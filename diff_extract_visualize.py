@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 from scipy.signal import savgol_filter
 from scipy.signal import find_peaks
+from sklearn.cluster import KMeans
+
 import os
 
 # list 매개변수로 입력받은 리스트의 목록을 출력하고 인덱스를 입력받아 해당 인덱스의 원소를 문자열로 반환하는 함수.
@@ -43,38 +45,43 @@ def posingFilter(arr, meanV, fps):
     return
 
 
-def clustering_valley(idxs):
-    pose_vallys=result_filtered_savgol.T.to_numpy()[0][idxs]
+def clustering_peakSection(idxs):
+    pose_data=result_filtered_savgol.T.to_numpy()[0][idxs]
+    
+    # nan값 제거
+    idxs2=np.array(idxs)
+    idxs=idxs2[~np.isnan(pose_data)]
+    pose_data=pose_data[~np.isnan(pose_data)]
     
     # peak 사이 구간의 mean, std 값 구하기
-    vally_mean=np.mean(pose_vallys)
-    vally_std=np.std(pose_vallys)
+    vally_mean=np.nanmean(pose_data)
+    vally_std=np.nanstd(pose_data)
     print(vally_mean,vally_std)
-    
-    # k-means 군집화로 flatten한 구간과 그렇지 않은 구간으로 나누기
-    pose_tmp=pose_vallys[:,np.newaxis]
-    kmeans=KMeans(n_clusters=2, random_state=0)
-    cluster_pose=kmeans.fit(pose_tmp)
-    vally_cluster_type=cluster_pose.labels_
-    
-    c0_idx=np.where(vally_cluster_type==0)
-    c1_idx=np.where(vally_cluster_type==1)
-
-    # 두 군집 중 어디가 flatten한 지 구별할때,
-    # 군집의 가장 최상단 점에서 평균 값과의 차가 std보다 크면, 튀어있는 값들로 이뤄졌다고 판단하고 이는 포즈를 전환하는 중이라 판별
-    # 따라서 std보다 작아야만 pose중이라 판별
-    c0_isPosing=abs(np.max(pose_vallys[c0_idx])-vally_mean)<vally_std
-    c1_isPosing=abs(np.max(pose_vallys[c1_idx])-vally_mean)<vally_std
-    
     # pose를 전환하는 시점으로만 이뤄져있다면, 해당 구간의 mean-std값은 -1 이상이므로 조건문으로 pass
     m_sub_s=vally_mean-vally_std
-    if m_sub_s<-1:
-        # 반대로 구간이 pose를 유지하는 시점으로만 이뤄져있다면, 해당 구간이 잘릴 수 있다.
+    if m_sub_s<=-1:
+        # k-means 군집화로 flatten한 구간과 그렇지 않은 구간으로 나누기
+        pose_tmp=pose_data[:,np.newaxis]
+        kmeans=KMeans(n_clusters=2, random_state=0)
+        cluster_pose=kmeans.fit(pose_tmp)
+        vally_cluster_type=cluster_pose.labels_
+        
+        c0_idx=np.where(vally_cluster_type==0)
+        c1_idx=np.where(vally_cluster_type==1)
+
+        # 두 군집 중 어디가 flatten한 지 구별할때,
+        # 군집의 가장 최상단 점에서 평균 값과의 차가 std보다 크면, 튀어있는 값들로 이뤄졌다고 판단하고 이는 포즈를 전환하는 중이라 판별
+        # 따라서 std보다 작아야만 pose중이라 판별
+        c0_isPosing=abs(np.max(pose_data[c0_idx])-vally_mean)<vally_std
+        c1_isPosing=abs(np.max(pose_data[c1_idx])-vally_mean)<vally_std
+        
+
+        # 구간이 pose를 유지하는 시점으로만 이뤄져있다면, 해당 구간이 잘릴 수 있다.
         # 따라서 posing이 유지되는 flatten한 구역은 -1 부근에 분포되어 있다는 점을 고려해 해당 구간의 mean값이 -1부근이라면
         # 해당 구간 idx를 모두 넘길것
-        if (c0_isPosing and c1_isPosing) or vally_mean < -0.99:
+        if (c0_isPosing and c1_isPosing):
             return idxs.tolist()
-        if c0_isPosing:
+        elif c0_isPosing:
             return idxs[c0_idx].tolist()
         elif c1_isPosing:
             return idxs[c1_idx].tolist()
@@ -118,7 +125,7 @@ np_v = df_v.to_numpy()
 np_v_temp = np_v.copy()
 np_v_temp2 = np_v_temp[:-1]
 np_v_temp1 = np_v_temp[1:]
-# np_v 에 앞,뒤 원소 중 Visibility 가 높은 원소로 치환
+# np_v 에 앞,뒤 원소 중 Visibility 가 작은 원소로 치환
 np_v = np.where(np_v_temp1 > np_v_temp2, np_v_temp2, np_v_temp1)
 v_vector = np.concatenate((np_v, np_v), axis=1)
 
@@ -186,8 +193,9 @@ print(f'diff_vector 그래프를 출력합니다.')
 plt.figure(figsize=(50,20))
 plt.plot(result_filtered_savgol)
 plt.plot(peaks, savgol_seq[peaks], "x", label='peak_point')
-plt.hlines(result_filtered_savgol.mean(), 0, result.shape[0], color="red", linewidth=1, label='sav_filtered mean')
-plt.hlines(result_filtered_savgol.mean() + result_filtered_savgol.std(), 0, result.shape[0], color="green", linewidth=1, label='sav_filtered mean-std')
+plt.plot(peaks2, savgol_seq[peaks2], "o")
+# plt.hlines(result_filtered_savgol.mean(), 0, result.shape[0], color="red", linewidth=1, label='sav_filtered mean')
+# plt.hlines(result_filtered_savgol.mean() + result_filtered_savgol.std(), 0, result.shape[0], color="green", linewidth=1, label='sav_filtered mean-std')
 # plt.hlines(result_filtered_savgol.mean() - result_filtered_savgol.std(), 0, result.shape[0], color="green", linewidth=1)
 # plt.plot(result_filtered_sma)
 # plt.plot(result_filtered_cma)
@@ -199,28 +207,27 @@ plt.hlines(result_filtered_savgol.mean() + result_filtered_savgol.std(), 0, resu
 section=[0]+peaks.tolist()+[result.shape[0]]
 poses=[]
 
+print(section)
 for s_idx in range(1,len(section)):
     s,f=section[s_idx-1],section[s_idx] # peak 사이 구간: starr, end point
     
-    # peak 사이구간 peak2 데이터 추출하기
-    pose_idxs=peaks2[np.where(s<peaks2)]
-    pose_idxs=pose_idxs[np.where(pose_idxs<f)]
-    
+    # peak 사이구간 데이터 추출하기
+    pose_idxs=list(range(s,f))
     # peak2 데이터가 1개 밖에 없다면 pass
     if len(pose_idxs)<2:
         continue
     # print(pose_idxs)
 
     # peak 구간 내 데이터를 이분적으로 군집화(0: posing, 1: pose 전환중)
-    posing_section=clustering_valley(pose_idxs)    
-    # print(posing_section)
-    # print()
+    posing_section=clustering_peakSection(pose_idxs)    
+    print(posing_section)
+    print()
 
     if posing_section:
-        plt.plot(posing_section, savgol_seq[posing_section], "o", color="pink")
+        plt.plot(posing_section, savgol_seq[posing_section],color="pink")
         poses.append([posing_section[0],posing_section[-1]])
 
-# print(len(poses))
+print(len(poses))
 np_poses=np.array(poses)
 df_poses = pd.DataFrame(np_poses, columns = ['start','end'])
 df_poses.to_csv(f'{target_file_path}/pose_sections.csv', index=False)

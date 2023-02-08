@@ -8,7 +8,7 @@ import os
 # mediapipe 변수 설정
 mp_pose = mp.solutions.pose
 mp_draw = mp.solutions.drawing_utils
-pose = mp_pose.Pose()
+pose = mp_pose.Pose(model_complexity=2)
 
 # 카메라 피드 사용시
 # CAMERA_DEVICE_ID = 0

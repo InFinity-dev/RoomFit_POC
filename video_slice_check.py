@@ -109,7 +109,7 @@ below_mean_frames_list = []
 #     else:
 #         before_bg_than_mean = False
 for idx, row in pose_section_df.iterrows():
-    if row["end"]-row["start"] > fps * 0:
+    if row["end"]-row["start"] > fps * 2.5:
          below_mean_frames_list.append([row["start"],row["end"]])
 
 print(f'분리된 동작 개수 : {len(below_mean_frames_list)} 개의 동작이 분리되었습니다.')
