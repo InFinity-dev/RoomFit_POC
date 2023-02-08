@@ -47,6 +47,8 @@ else:
     exit()
 
 df = pd.read_csv(f'{extracted_data_path}/{target_data}')
+pose_section_df = pd.read_csv(f'{extracted_data_path}/pose_sections.csv')
+
 print(f'[데이터 개요]\n{df}\n')
 
 print(f'{video_path} 영상 스트림을 실행합니다.\n')
@@ -73,42 +75,45 @@ check_bool = False
 temp_frame = 0.0
 below_mean_frames_list = []
 
-# 가져온 csv 데이터로부터 mean값 구하기
-mean = float(df.mean())
+# # 가져온 csv 데이터로부터 mean값 구하기
+# mean = float(df.mean())
 
-for idx, row in df.iterrows():
-    frame_idx = int(idx)
-    frame_diff_amount = float(row[0])
+# for idx, row in df.iterrows():
+#     frame_idx = int(idx)
+#     frame_diff_amount = float(row[0])
 
-    if before_bg_than_mean and frame_diff_amount < mean:
-        if not check_bool:
-            temp_frame = frame_idx
-            check_bool = True
+#     if before_bg_than_mean and frame_diff_amount < mean:
+#         if not check_bool:
+#             temp_frame = frame_idx
+#             check_bool = True
 
-    if not before_bg_than_mean and frame_diff_amount >= mean:
-        if check_bool:
-            div_len = abs(frame_idx - temp_frame)
-            check_bool = False
-            if div_len < fps * 3:
-                continue
+#     if not before_bg_than_mean and frame_diff_amount >= mean:
+#         if check_bool:
+#             div_len = abs(frame_idx - temp_frame)
+#             check_bool = False
+#             if div_len < fps * 3:
+#                 continue
 
-            below_mean_frames_list.append([int(temp_frame + (div_len * 0.2)), int(frame_idx - (div_len * 0.2))])
+#             below_mean_frames_list.append([int(temp_frame + (div_len * 0.2)), int(frame_idx - (div_len * 0.2))])
 
-    if check_bool and int(df.index[-1]) == frame_idx:
-        div_len = abs(frame_idx - temp_frame)
-        check_bool = False
-        if div_len < fps * 3:
-            continue
+#     if check_bool and int(df.index[-1]) == frame_idx:
+#         div_len = abs(frame_idx - temp_frame)
+#         check_bool = False
+#         if div_len < fps * 3:
+#             continue
 
-        below_mean_frames_list.append([int(temp_frame + (div_len * 0.2)), int(frame_idx - (div_len * 0.2))])
+#         below_mean_frames_list.append([int(temp_frame + (div_len * 0.2)), int(frame_idx - (div_len * 0.2))])
 
-    if frame_diff_amount > mean:
-        before_bg_than_mean = True
-    else:
-        before_bg_than_mean = False
+#     if frame_diff_amount > mean:
+#         before_bg_than_mean = True
+#     else:
+#         before_bg_than_mean = False
+for idx, row in pose_section_df.iterrows():
+    if row["end"]-row["start"] > fps * 0:
+         below_mean_frames_list.append([row["start"],row["end"]])
 
 print(f'분리된 동작 개수 : {len(below_mean_frames_list)} 개의 동작이 분리되었습니다.')
-print(f'mean 값({mean}) 이하 기준으로 분리된 프레임 구간\n')
+# print(f'mean 값({mean}) 이하 기준으로 분리된 프레임 구간\n')
 
 vid_slice_info = []
 pose_count = 1
