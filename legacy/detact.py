@@ -3,6 +3,13 @@ import mediapipe as mp
 from collections import deque
 import os
 
+# list 매개변수로 입력받은 리스트의 목록을 출력하고 인덱스를 입력받아 해당 인덱스의 원소를 문자열로 반환하는 함수.
+# msg 에는 선택시 띄울 메세지를 입력
+def list_selection(list, msg):
+    for index, elem in enumerate(list):
+        print(f'[{index}] 입력시 [{elem}] 선택')
+    sel = int(input(f'\n{msg}'))
+    return str(list[sel])
 
 # 움직이는지 판단 기준
 criteria = 0.55 # 이전 프레임과 차이
@@ -24,7 +31,8 @@ file_list_mp4.sort()
 print(f'처리할 영상 목록 : {file_list_mp4}\n')
 
 # 분석할 데이터 폴더 입력받아 경로 세팅
-target_mp4 = input('>> 분석을 수행할 영상 이름을 입력하세요 (확장자 포함 *.mp4): ')
+# target_mp4 = input('>> 분석을 수행할 영상 이름을 입력하세요 (확장자 포함 *.mp4): ')
+target_mp4 = list_selection(file_list_mp4, '>> 분석을 수행할 영상을 선택하세요. (확장자 *.mp4) : ')
 
 video_name = os.path.join(folder_path, target_mp4)
 # print(video_name)

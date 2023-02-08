@@ -3,11 +3,21 @@ import mediapipe as mp
 import numpy as np
 import os
 
+# list 매개변수로 입력받은 리스트의 목록을 출력하고 인덱스를 입력받아 해당 인덱스의 원소를 문자열로 반환하는 함수.
+# msg 에는 선택시 띄울 메세지를 입력
+def list_selection(list, msg):
+    for index, elem in enumerate(list):
+        print(f'[{index}] 입력시 [{elem}] 선택')
+    sel = int(input(f'\n{msg}'))
+    return str(list[sel])
+
+
 # 소스 선택
 print('사용할 소스를 선택하세요.')
 print('1 : 카메라')
 print('2 : 영상')
 sel_source = int(input('>> 소스 : '))
+print()
 
 # 카메라 선택 분기
 if sel_source == 1:
@@ -16,15 +26,15 @@ if sel_source == 1:
     cap = cv2.VideoCapture(CAMERA_DEVICE_ID)
 # 영상 선택 분기
 else:
-    print('\n영상으로 부터 랜드마크 오버레이를 실시합니다. ESC키 입력시 종료.')
-
     folder_path = './target_video'
     file_list = os.listdir(folder_path)
     file_list_mp4 = [file for file in file_list if file.endswith(".mp4")]
     file_list_mp4.sort()
-    print(f'비디오 목록 : {file_list_mp4}\n')
-    video_name = input('>> 오버레이를 출력할 비디오 이름을 입력하세요 (확장자 포함 *.mp4) : ')
+    # print(f'비디오 목록 : {file_list_mp4}\n')
+    # video_name = input('>> 오버레이를 출력할 비디오 이름을 입력하세요 (확장자 포함 *.mp4) : ')
+    video_name = list_selection(file_list_mp4, '>> 오버레이를 출력할 비디오를 선택하세요. (확장자 *.mp4) : ')
     target_file = os.path.join(folder_path, video_name)
+    print(f'\n{video_name} 영상으로 부터 랜드마크 오버레이를 실시합니다. ESC키 입력시 종료.')
     cap = cv2.VideoCapture(target_file)
 
 # mediapipe 변수 설정

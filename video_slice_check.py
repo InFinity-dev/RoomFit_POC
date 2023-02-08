@@ -5,6 +5,15 @@ import ffmpeg
 from time import sleep
 import os
 
+# list 매개변수로 입력받은 리스트의 목록을 출력하고 인덱스를 입력받아 해당 인덱스의 원소를 문자열로 반환하는 함수.
+# msg 에는 선택시 띄울 메세지를 입력
+def list_selection(list, msg):
+    for index, elem in enumerate(list):
+        print(f'[{index}] 입력시 [{elem}] 선택')
+    sel = int(input(f'\n{msg}'))
+    return str(list[sel])
+
+
 # 영상 폴더 경로 설정
 folder_path = './target_video'
 file_list = os.listdir(folder_path)
@@ -15,7 +24,8 @@ file_list_mp4.sort()
 print(f'처리할 영상 목록 : {file_list_mp4}\n')
 
 # 분석 비디오 이름 입력받기
-target_mp4 = input('>>> 분석을 수행할 영상 이름을 입력하세요 (확장자 포함 *.mp4) : ')
+# target_mp4 = input('>>> 분석을 수행할 영상 이름을 입력하세요 (확장자 포함 *.mp4) : ')
+target_mp4 = list_selection(file_list_mp4, '>>> 분석을 수행할 영상을 선택하세요. (확장자 *.mp4) : ')
 video_path = os.path.join(folder_path, target_mp4)
 print(video_path)
 
@@ -30,7 +40,8 @@ if os.path.exists(extracted_data_path):
     file_list = os.listdir(extracted_data_path)
     file_list_csv = [file for file in file_list if file.endswith(".csv")]
     print(f'\n{extracted_data_path} 경로에 다음과 같은 csv 파일들이 존재합니다.\n{file_list_csv}\n')
-    target_data = input(f'>>> 비디오에 적용할 데이터 파일을 입력하세요. (확장자 포함 *.csv) : ')
+    # target_data = input(f'>>> 비디오에 적용할 데이터 파일을 입력하세요. (확장자 포함 *.csv) : ')
+    target_data = list_selection(file_list_csv ,'>>> 비디오에 적용할 데이터 파일을 선택하세요. (확장자 *.csv) : ')
 else:
     print(f'비디오에 대한 분석데이터가 존재하지 않습니다. diff_extract_visualize.py를 먼저 실행하세요.')
     exit()

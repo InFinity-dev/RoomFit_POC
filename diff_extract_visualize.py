@@ -5,6 +5,14 @@ from scipy.signal import savgol_filter
 from scipy.signal import find_peaks
 import os
 
+# list 매개변수로 입력받은 리스트의 목록을 출력하고 인덱스를 입력받아 해당 인덱스의 원소를 문자열로 반환하는 함수.
+# msg 에는 선택시 띄울 메세지를 입력
+def list_selection(list, msg):
+    for index, elem in enumerate(list):
+        print(f'[{index}] 입력시 [{elem}] 선택')
+    sel = int(input(f'\n{msg}'))
+    return str(list[sel])
+
 def minmax_norm(arr):
     arr_min = np.min(arr)
 
@@ -47,7 +55,8 @@ extracted_folders.sort()
 print(f'분석한 비디오 Landmark 데이터 목록 : {extracted_folders}\n')
 
 # 분석할 데이터 폴더 입력받아 경로 세팅
-folder_name = input('>>> diff 분석을 수행할 데이터 폴더 이름을 입력하세요 : ')
+# folder_name = input('>>> diff 분석을 수행할 데이터 폴더 이름을 입력하세요 : ')
+folder_name = list_selection(extracted_folders,'>>> diff 분석을 수행할 데이터 폴더 이름을 입력하세요 : ')
 target_file_path = os.path.join(extracted_folder_path, folder_name)
 print(f'\n{target_file_path} 경로에서 다음의 csv파일을 읽어옵니다.')
 
