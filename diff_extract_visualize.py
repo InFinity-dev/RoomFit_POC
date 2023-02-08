@@ -49,12 +49,13 @@ extracted_folder_path = './extracted'
 
 # 결과 폴더 경로내 존재하는 하위 폴더 목록 가져오기
 extracted_folders = os.listdir(extracted_folder_path)
-extracted_folders.sort()
-print(f'분석한 비디오 Landmark 데이터 목록 : {extracted_folders}\n')
+file_list_folder = [folder for folder in extracted_folders if os.path.isdir(os.path.join(extracted_folder_path, folder))]
+file_list_folder.sort()
+print(f'분석한 비디오 Landmark 데이터 목록 : {file_list_folder}\n')
 
 # 분석할 데이터 폴더 입력받아 경로 세팅
 # folder_name = input('>>> diff 분석을 수행할 데이터 폴더 이름을 입력하세요 : ')
-folder_name = list_selection(extracted_folders,'>>> diff 분석을 수행할 데이터 폴더 이름을 입력하세요 : ')
+folder_name = list_selection(file_list_folder,'>>> diff 분석을 수행할 데이터 폴더 이름을 입력하세요 : ')
 target_file_path = os.path.join(extracted_folder_path, folder_name)
 print(f'\n{target_file_path} 경로에서 다음의 csv파일을 읽어옵니다.')
 

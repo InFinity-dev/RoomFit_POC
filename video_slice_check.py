@@ -111,6 +111,7 @@ print(f'분리된 동작 개수 : {len(below_mean_frames_list)} 개의 동작이
 print(f'mean 값({mean}) 이하 기준으로 분리된 프레임 구간\n')
 
 vid_slice_info = []
+pose_count = 1
 for elem in below_mean_frames_list:
 
     # 포즈 시작 프레임, 포즈 종료 프레임, 포즈 길이(초)를 담을 임시 list
@@ -129,8 +130,8 @@ for elem in below_mean_frames_list:
     min_end = sec_end // 60
     sec_end %= 60
 
-    print(f'프레임 구간 : {elem} -> {min_start}분 {sec_start}초 ~ {min_end}분 {sec_end}초 : {duration_min}분 {duration_sec}초')
-
+    print(f'{pose_count}번째 포즈 프레임 구간 : {elem} -> {min_start}분 {sec_start}초 ~ {min_end}분 {sec_end}초 : {duration_min}분 {duration_sec}초')
+    pose_count += 1
     append_list.append(elem[0])
     append_list.append(elem[1])
     append_list.append(duration_sec)
