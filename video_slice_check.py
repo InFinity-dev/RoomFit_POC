@@ -108,10 +108,13 @@ for idx, row in df.iterrows():
         before_bg_than_mean = False
 
 print(f'분리된 동작 개수 : {len(below_mean_frames_list)} 개의 동작이 분리되었습니다.')
-print(f'mean 값({mean}) 이하 기준으로 분리된 프레임 구간')
+print(f'mean 값({mean}) 이하 기준으로 분리된 프레임 구간\n')
 
-
+vid_slice_info = []
 for elem in below_mean_frames_list:
+
+    # 포즈 시작 프레임, 포즈 종료 프레임, 포즈 길이(초)를 담을 임시 list
+    append_list = []
 
     # 프레임을 분,초로 변환
     sec_start = int(elem[0]/fps)
@@ -127,6 +130,17 @@ for elem in below_mean_frames_list:
     sec_end %= 60
 
     print(f'프레임 구간 : {elem} -> {min_start}분 {sec_start}초 ~ {min_end}분 {sec_end}초 : {duration_min}분 {duration_sec}초')
+
+    append_list.append(elem[0])
+    append_list.append(elem[1])
+    append_list.append(duration_sec)
+
+    # 임시 리스트 append
+    vid_slice_info.append(append_list)
+
+frame_slice_df = pd.DataFrame(vid_slice_info, columns=['start_frame', 'end_frame', 'duration'])
+frame_slice_df.to_csv(f'{extracted_data_path}/frame_slice_info.csv', index=False)
+print(f'>>> {extracted_data_path} 폴더에 프레임 slice 정보가 "frame_slice_info.csv" 로 저장되었습니다.')
 
 # mediapipe 변수 설정
 mp_pose = mp.solutions.pose
