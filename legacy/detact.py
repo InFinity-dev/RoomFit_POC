@@ -22,7 +22,7 @@ scean_count = 120 # 안움직이는 프레임이 몇개 지속되야 행동인�
 
 # 비디오 스트림 사용시
 # 타겟 폴더 경로 설정
-folder_path = './target_video'
+folder_path = '../target_video'
 file_list = os.listdir(folder_path)
 file_list_mp4 = [file for file in file_list if file.endswith(".mp4")]
 
