@@ -116,12 +116,17 @@ for elem in below_mean_frames_list:
     # 프레임을 분,초로 변환
     sec_start = int(elem[0]/fps)
     sec_end = int(elem[1]/fps)
+
+    duration_sec = int((elem[1]-elem[0])/fps)
+    duration_min = duration_sec // 60
+    duration_sec %= 60
+
     min_start = sec_start // 60
     sec_start %= 60
     min_end = sec_end // 60
     sec_end %= 60
 
-    print(f'프레임 구간 : {elem} -> {min_start}분 {sec_start}초 ~ {min_end}분 {sec_end}초')
+    print(f'프레임 구간 : {elem} -> {min_start}분 {sec_start}초 ~ {min_end}분 {sec_end}초 : {duration_min}분 {duration_sec}초')
 
 # mediapipe 변수 설정
 mp_pose = mp.solutions.pose
