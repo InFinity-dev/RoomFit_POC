@@ -15,15 +15,13 @@ def list_selection(list, msg):
 
 def minmax_norm(arr):
     arr_min = np.min(arr)
-
     arr_max = np.max(arr)
-
     return (arr - arr_min) // (arr_max - arr_min)
 
 
 def stand_norm(arr):
-    arr_mean = np.mean(arr)
-    arr_std = np.std(arr)
+    arr_mean = np.nanmean(arr)
+    arr_std = np.nanstd(arr)
     return (arr - arr_mean) // arr_std
 
 
