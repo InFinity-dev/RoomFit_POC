@@ -110,7 +110,7 @@ for elem in below_mean_frames_list:
     min_end = sec_end // 60
     sec_end %= 60
 
-    print(f'프레임 구간 : {elem} -> {min_start}분 {sec_start}초 ~ {min_start}분 {sec_start}초')
+    print(f'프레임 구간 : {elem} -> {min_start}분 {sec_start}초 ~ {min_end}분 {sec_end}초')
 
 # mediapipe 변수 설정
 mp_pose = mp.solutions.pose
