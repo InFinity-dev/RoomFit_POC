@@ -1,0 +1,1 @@
+Extracted cvs files will be stored under same name folder of target video.
