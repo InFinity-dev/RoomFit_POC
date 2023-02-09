@@ -227,7 +227,7 @@ for s_idx in range(1, len(section)):
     print()
 
     if posing_section:
-        plt.plot(posing_section, savgol_seq[posing_section], color="pink")
+        plt.plot(posing_section, savgol_seq[posing_section], color="red")
         poses.append([posing_section[0], posing_section[-1]])
 
 print(len(poses))
