@@ -235,6 +235,6 @@ np_poses = np.array(poses)
 df_poses = pd.DataFrame(np_poses, columns=['start', 'end'])
 df_poses.to_csv(f'{target_file_path}/pose_sections.csv', index=False)
 
-plt.savefig(f'{target_file_path}/pose_sliced_plot.png')
+plt.savefig(f'{target_file_path}/pose_sliced_visualize_plot.png')
 plt.legend()
 plt.show()

@@ -37,46 +37,57 @@ print(f'{file_list_csv}\n')
 if os.path.isfile(f'{target_file_path}/data_x.csv'):
     df_x = pd.read_csv(f'{target_file_path}/data_x.csv')
     df_x.plot(title = 'x-factor', kind = 'line', figsize=(50,20))
+    plt.savefig(f'{target_file_path}/data_x.png')
 
 if os.path.isfile(f'{target_file_path}/data_y.csv'):
     df_y = pd.read_csv(f'{target_file_path}/data_y.csv')
     df_y.plot(title = 'y-factor', kind = 'line', figsize=(50,20))
+    plt.savefig(f'{target_file_path}/data_y.png')
 
 if os.path.isfile(f'{target_file_path}/data_z.csv'):
     df_z = pd.read_csv(f'{target_file_path}/data_z.csv')
     df_z.plot(title = 'z-factor', kind = 'line', figsize=(50,20))
+    plt.savefig(f'{target_file_path}/data_z.png')
 
-if os.path.isfile(f'{target_file_path}/euclidean_diff.csv'):
+if os.path.isfile(f'{target_file_path}/data_v.csv'):
     df_v = pd.read_csv(f'{target_file_path}/data_v.csv')
     df_v.plot(title = 'v-factor', kind = 'line', figsize=(50,20))
+    plt.savefig(f'{target_file_path}/data_v.png')
 
 if os.path.isfile(f'{target_file_path}/euclidean_diff.csv'):
     df_euclidean_diff = pd.read_csv(f'{target_file_path}/euclidean_diff.csv')
-    df_euclidean_diff.plot(title = 'vector_graph raw', kind = 'line', figsize=(50,20))
+    df_euclidean_diff.plot(title = 'vector_graph std_norm', kind = 'line', figsize=(50,20))
+    plt.savefig(f'{target_file_path}/euclidean_diff.png')
 
 if os.path.isfile(f'{target_file_path}/savgol_diff.csv'):
     df_savgol_diff = pd.read_csv(f'{target_file_path}/savgol_diff.csv')
     df_savgol_diff.plot(title = 'vector_graph filtered : SAVGOL', kind = 'line', figsize=(50,20))
+    plt.savefig(f'{target_file_path}/savgol_diff.png')
 
 if os.path.isfile(f'{target_file_path}/ema_diff.csv'):
     df_ema_diff = pd.read_csv(f'{target_file_path}/ema_diff.csv')
     df_ema_diff.plot(title = 'vector_graph filtered : EMA', kind = 'line', figsize=(50,20))
+    plt.savefig(f'{target_file_path}/ema_diff.png')
 
 if os.path.isfile(f'{target_file_path}/sma_diff.csv'):
     df_sma_diff = pd.read_csv(f'{target_file_path}/sma_diff.csv')
     df_sma_diff.plot(title = 'vector_graph filtered : SMA', kind = 'line', figsize=(50,20))
+    plt.savefig(f'{target_file_path}/sma_diff.png')
 
 if os.path.isfile(f'{target_file_path}/cma_diff.csv'):
     df_cma_diff = pd.read_csv(f'{target_file_path}/cma_diff.csv')
     df_cma_diff.plot(title = 'vector_graph filtered : CMA', kind = 'line', figsize=(50,20))
+    plt.savefig(f'{target_file_path}/cma_diff.png')
 
 if os.path.isfile(f'{target_file_path}/gau_diff.csv'):
     df_gau_diff = pd.read_csv(f'{target_file_path}/gau_diff.csv')
     df_gau_diff.plot(title = 'vector_graph filtered : GAUSSIAN', kind = 'line', figsize=(50,20))
+    plt.savefig(f'{target_file_path}/gau_diff.png')
 
-if os.path.isfile(f'{target_file_path}/pose_sections.csv.csv'):
-    df_gau_diff = pd.read_csv(f'{target_file_path}/pose_sections.csv.csv')
-    df_gau_diff.plot(title = 'pose_sections.csv', kind = 'line', figsize=(50,20))
+# if os.path.isfile(f'{target_file_path}/pose_sections.csv'):
+#     df_gau_diff = pd.read_csv(f'{target_file_path}/pose_sections.csv')
+#     df_gau_diff.plot(title = 'pose_sections.csv', kind = 'line', figsize=(50,20))
+#     plt.savefig(f'{target_file_path}/pose_sections.png')
 
 plt.legend()
 plt.show()

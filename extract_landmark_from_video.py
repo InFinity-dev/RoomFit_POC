@@ -9,7 +9,7 @@ import os
 mp_pose = mp.solutions.pose
 mp_draw = mp.solutions.drawing_utils
 # model_complexity customized
-pose = mp_pose.Pose(model_complexity = 2)
+pose = mp_pose.Pose(model_complexity=2)
 
 # 카메라 피드 사용시
 # CAMERA_DEVICE_ID = 0
