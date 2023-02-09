@@ -8,7 +8,8 @@ import os
 # mediapipe 변수 설정
 mp_pose = mp.solutions.pose
 mp_draw = mp.solutions.drawing_utils
-pose = mp_pose.Pose()
+# model_complexity customized
+pose = mp_pose.Pose(model_complexity=2)
 
 # 카메라 피드 사용시
 # CAMERA_DEVICE_ID = 0
@@ -59,7 +60,7 @@ for target_mp4 in file_list_mp4:
     # 영상 파일 정보 가져오기
     info = ffmpeg.probe(target_file)
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
 
@@ -74,7 +75,7 @@ for target_mp4 in file_list_mp4:
     # 랜드마크 저장할 리스트 선언
     # mediapipe 랜드마크 개수, 컬럼 명 추출
     columns_py = []
-    for i in range(len(mp_pose.PoseLandmark)) :
+    for i in range(len(mp_pose.PoseLandmark)):
         columns_py.append(mp_pose.PoseLandmark(i).name)
     # 랜드마크 x,y,z,vis 요소 담을 리스트 선언
     total_x = []
@@ -123,7 +124,7 @@ for target_mp4 in file_list_mp4:
                 per_frame_value_y.append(results.pose_landmarks.landmark[mp_pose.PoseLandmark(i).value].y)
                 per_frame_value_z.append(results.pose_landmarks.landmark[mp_pose.PoseLandmark(i).value].z)
                 per_frame_value_vis.append(results.pose_landmarks.landmark[mp_pose.PoseLandmark(i).value].visibility)
-            else :
+            else:
                 per_frame_value_x.append(None)
                 per_frame_value_y.append(None)
                 per_frame_value_z.append(None)
@@ -141,7 +142,7 @@ for target_mp4 in file_list_mp4:
     print(f'{target_file} 에 대해 총 {count}개의 프레임이 처리 되었습니다.')
     fin = datetime.datetime.now()
     print(f'종료 시간 : {fin}')
-    print(f'걸린 시간 : {fin-start}')
+    print(f'걸린 시간 : {fin - start}')
 
     # 저장한 랜드마크 파일로 쓰기
     dx = pd.DataFrame(total_x, columns=columns_py)
@@ -152,10 +153,10 @@ for target_mp4 in file_list_mp4:
     save_path = f'./extracted/{vid_name}'
     os.mkdir(save_path)
 
-    dx.to_csv(f'{save_path}/data_x.csv',index=False)
-    dy.to_csv(f'{save_path}/data_y.csv',index=False)
-    dz.to_csv(f'{save_path}/data_z.csv',index=False)
-    dv.to_csv(f'{save_path}/data_v.csv',index=False)
+    dx.to_csv(f'{save_path}/data_x.csv', index=False)
+    dy.to_csv(f'{save_path}/data_y.csv', index=False)
+    dz.to_csv(f'{save_path}/data_z.csv', index=False)
+    dv.to_csv(f'{save_path}/data_v.csv', index=False)
     print(f'{vid_name}에 대한 Landmark 데이터가 csv 파일로 저장되었습니다.\n')
 
     for_counter += 1
