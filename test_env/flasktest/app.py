@@ -12,12 +12,31 @@ def index():
     """Video streaming home page."""
     return render_template('index.html')
 
+@app.route('/video_feed')
+def video_feed1():
+    """Video streaming route. Put this in the src attribute of an img tag."""
+    return Response(gen(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
 @app.route('/test_angle')
 def test_angle_get():
     """Video streaming home page."""
     return render_template('test_angle.html')
 
+@app.route('/test_angle_post')
+def test_angle_post():
+    """Test angle check guide."""
+    
+    return Response(angle_check_guide_test.run(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/extracted_pose_guide_img')
+def extracted_pose_guide_img():
+    """Test showing extracted guide img."""
+    guide_img = extract_key_point_guide.ret_image()
+
+    return Response(guide_img, mimetype='multipart/x-mixed-replace; boundary=frame')
+    
 def gen():
     """Video streaming generator function."""
     cap = cv2.VideoCapture('768x576.avi')
@@ -64,27 +83,3 @@ def gen():
         key = cv2.waitKey(20)
         if key == 27:
            break
-   
-@app.route('/video_feed')
-def video_feed1():
-    """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
-
-@app.route('/test_angle_post')
-def test_angle_post():
-    """Test angle check guide."""
-    
-    return Response(angle_check_guide_test.run(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
-
-@app.route('/extracted_pose_guide_img')
-def extracted_pose_guide_img():
-    """Test showing extracted guide img."""
-    guide_img = extract_key_point_guide.ret_image()
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    print(type(guide_img))
-
-    return Response(guide_img, mimetype='multipart/x-mixed-replace; boundary=frame')
-    
-
