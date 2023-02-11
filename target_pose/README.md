@@ -1,0 +1,1 @@
+Place target pose picture for angle_check_guide.py in this directory.
