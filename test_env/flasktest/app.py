@@ -1,6 +1,8 @@
 import time
 import cv2 
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, jsonify, send_file
+import angle_check_guide_test
+import extract_key_point_guide
 
 app = Flask(__name__)
 sub = cv2.createBackgroundSubtractorMOG2()  # create background subtractor
@@ -9,6 +11,11 @@ sub = cv2.createBackgroundSubtractorMOG2()  # create background subtractor
 def index():
     """Video streaming home page."""
     return render_template('index.html')
+
+@app.route('/test_angle')
+def test_angle_get():
+    """Video streaming home page."""
+    return render_template('test_angle.html')
 
 
 def gen():
@@ -58,13 +65,26 @@ def gen():
         if key == 27:
            break
    
-        
-
 @app.route('/video_feed')
-def video_feed():
+def video_feed1():
     """Video streaming route. Put this in the src attribute of an img tag."""
     return Response(gen(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/test_angle_post')
+def test_angle_post():
+    """Test angle check guide."""
+    
+    return Response(angle_check_guide_test.run(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/extracted_pose_guide_img')
+def extracted_pose_guide_img():
+    """Test showing extracted guide img."""
+    guide_img = extract_key_point_guide.ret_image()
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print(type(guide_img))
+
+    return Response(guide_img, mimetype='multipart/x-mixed-replace; boundary=frame')
     
 
