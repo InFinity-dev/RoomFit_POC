@@ -25,11 +25,11 @@ def run():
 
     # 타겟 폴더 내 mp4 파일 리스트 오름차순 정렬 후 출력
     file_list_mp4.sort()
-    print(f'>>> target_video 폴더 내의 모든 .mp4 영상의 랜드마크를 추출합니다.')
+    print(f'>>> static/uploads 폴더 내의 모든 .mp4 영상의 랜드마크를 추출합니다.')
     print(f'처리할 영상 목록 : {file_list_mp4}\n')
 
     # 결과 폴더 내 존재하는 폴더 목록 가져오기
-    extracted_folder_path = './static/uploads'
+    extracted_folder_path = './static/extracted'
     extracted_files = os.listdir(extracted_folder_path)
 
     # 타겟 경로에 있는 영상에 대해 순차 처리
@@ -152,7 +152,7 @@ def run():
         dz = pd.DataFrame(total_z, columns=columns_py)
         dv = pd.DataFrame(total_vis, columns=columns_py)
 
-        save_path = f'./static/{vid_name}'
+        save_path = f'./static/extracted/{vid_name}'
         os.mkdir(save_path)
 
         dx.to_csv(f'{save_path}/data_x.csv', index=False)
