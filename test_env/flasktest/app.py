@@ -13,7 +13,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/video_feed')
-def video_feed1():
+def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
     return Response(gen(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
