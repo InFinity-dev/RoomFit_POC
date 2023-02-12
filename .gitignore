@@ -5,6 +5,7 @@
 /target_video/bom_test_1.mp4/
 /target_video/bom_test_2.mp4/
 *.pyc
+/face_id_login/dataset/
 /face_id_login/dataset/bom/
 /face_id_login/dataset/cksdn/
 /face_id_login/dataset/leeminsub/
