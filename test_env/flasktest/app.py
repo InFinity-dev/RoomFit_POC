@@ -35,14 +35,14 @@ def test_angle_get():
 
 @app.route('/test_angle_post')
 def test_angle_post():
-    """Test angle check guide."""
+    """angle check guide."""
     
     return Response(angle_check_guide_test.run(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/extracted_pose_guide_img')
 def extracted_pose_guide_img():
-    """Test showing extracted guide img."""
+    """showing extracted guide img."""
     guide_img = extract_key_point_guide.ret_image()
 
     return Response(guide_img, mimetype='multipart/x-mixed-replace; boundary=frame')
