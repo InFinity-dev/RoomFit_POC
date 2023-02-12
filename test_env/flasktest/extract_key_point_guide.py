@@ -261,7 +261,7 @@ def extractKeypoint(path):
 
 def ret_image():
     folder_path = '../../target_pose'
-    target_pose_image = "dab.jpg"
+    target_pose_image = "^^7.jpg"
 
     image_path = os.path.join(folder_path, target_pose_image)
 
