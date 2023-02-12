@@ -1,11 +1,21 @@
+import os
 import time
 import cv2 
-from flask import Flask, render_template, Response, jsonify, send_file
+from flask import Flask, render_template, Response, jsonify, send_file, request, redirect, flash, url_for
+from werkzeug.utils import secure_filename
+
 import angle_check_guide_test
 import extract_key_point_guide
+import extract_landmark_for_flask
 
 app = Flask(__name__)
 sub = cv2.createBackgroundSubtractorMOG2()  # create background subtractor
+
+UPLOAD_FOLDER = 'static/uploads/'
+
+app.secret_key = "secret key"
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 @app.route('/')
 def index():
@@ -13,7 +23,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/video_feed')
-def video_feed1():
+def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
     return Response(gen(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -25,18 +35,46 @@ def test_angle_get():
 
 @app.route('/test_angle_post')
 def test_angle_post():
-    """Test angle check guide."""
+    """angle check guide."""
     
     return Response(angle_check_guide_test.run(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/extracted_pose_guide_img')
 def extracted_pose_guide_img():
-    """Test showing extracted guide img."""
+    """showing extracted guide img."""
     guide_img = extract_key_point_guide.ret_image()
 
     return Response(guide_img, mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/upload_video', methods=['GET'])
+def upload_form():
+	return render_template('upload.html')
+
+@app.route('/upload_video', methods=['POST'])
+def upload_video():
     
+
+    if 'file' not in request.files:
+        flash('No file part')
+        return redirect(request.url)
+    file = request.files['file']
+    if file.filename == '':
+        flash('No image selected for uploading')
+        return redirect(request.url)
+    else:
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        print('upload_video filename: ' + filename)
+        flash('Video successfully uploaded and displayed below')
+        extract_landmark_for_flask.run()
+        return render_template('upload.html', filename=filename)
+
+@app.route('/display/<filename>')
+def display_video(filename):
+	#print('display_video filename: ' + filename)
+	return redirect(url_for('static', filename='uploads/' + filename), code=301)
+
 def gen():
     """Video streaming generator function."""
     cap = cv2.VideoCapture('768x576.avi')
