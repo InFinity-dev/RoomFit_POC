@@ -19,13 +19,13 @@ def run():
 
     # 비디오 스트림 사용시
     # 타겟 폴더 경로 설정
-    folder_path = './static/uploads'
+    folder_path = './static/target_video'
     file_list = os.listdir(folder_path)
     file_list_mp4 = [file for file in file_list if file.endswith(".mp4")]
 
     # 타겟 폴더 내 mp4 파일 리스트 오름차순 정렬 후 출력
     file_list_mp4.sort()
-    print(f'>>> static/uploads 폴더 내의 모든 .mp4 영상의 랜드마크를 추출합니다.')
+    print(f'>>> static/target_video 폴더 내의 모든 .mp4 영상의 랜드마크를 추출합니다.')
     print(f'처리할 영상 목록 : {file_list_mp4}\n')
 
     # 결과 폴더 내 존재하는 폴더 목록 가져오기

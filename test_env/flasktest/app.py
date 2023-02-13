@@ -7,11 +7,13 @@ from werkzeug.utils import secure_filename
 import angle_check_guide_test
 import extract_key_point_guide
 import extract_landmark_for_flask
+import diff_extract_visualize_for_flask
+import video_slice_check_for_flask
 
 app = Flask(__name__)
 sub = cv2.createBackgroundSubtractorMOG2()  # create background subtractor
 
-UPLOAD_FOLDER = 'static/uploads/'
+UPLOAD_FOLDER = 'static/target_video/'
 
 app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -68,6 +70,9 @@ def upload_video():
         print('upload_video filename: ' + filename)
         flash('Video successfully uploaded and displayed below')
         extract_landmark_for_flask.run()
+        diff_extract_visualize_for_flask.run(file.filename.split(".")[0])
+        video_slice_check_for_flask.run(file.filename.split(".")[0])
+
         return render_template('upload.html', filename=filename)
 
 @app.route('/display/<filename>')
