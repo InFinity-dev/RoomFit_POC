@@ -1,14 +1,17 @@
 import os
 import time
 import cv2 
-from flask import Flask, render_template, Response, jsonify, send_file, request, redirect, flash, url_for
+from flask import Flask, render_template, Response, jsonify, send_file, request, redirect, flash, url_for, Blueprint
+from flask import current_app as current_app
 from werkzeug.utils import secure_filename
+from module import dbModule
 
 import angle_check_guide_test
 import extract_key_point_guide
 import extract_landmark_for_flask
 import diff_extract_visualize_for_flask
 import video_slice_check_for_flask
+from test_db import test_db
 
 app = Flask(__name__)
 sub = cv2.createBackgroundSubtractorMOG2()  # create background subtractor
@@ -18,6 +21,7 @@ UPLOAD_FOLDER = 'static/target_video/'
 app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.register_blueprint(test_db)
 
 @app.route('/')
 def index():
