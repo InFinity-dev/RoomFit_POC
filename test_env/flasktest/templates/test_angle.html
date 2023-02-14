@@ -1,10 +1,36 @@
 <html>
-  <head>
-    <title>Streaming </title>
-  </head>
-  <body>
-    <h1>Streaming </h1>
-    <img src="{{ url_for('test_angle_post') }}">
-    <img src="{{ url_for('extracted_pose_guide_img') }}">
-  </body>
+
+<head>
+  <title>Streaming </title>
+
+  <script>
+    function updateValue() {
+      fetch('/test_angle_score')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('value').textContent = data.value;
+        });
+    }
+    // 새로고침 시간
+    const term = 100
+    setInterval(updateValue, term); 
+  </script>
+</head>
+
+<body>
+  <h1>Streaming </h1>
+
+  <div style="display:flex; flex-direction:row;">
+    <img src="{{ url_for('test_angle_post') }}" style="width: 1280px; height: 720px;">
+    <div style="display:flex; flex-direction:column;">
+      <img src="{{ url_for('static', filename='^^7.jpg') }}" style="width: 640px; height: 360px;">
+      <img src="{{ url_for('static', filename='^^7.jpg') }}" style="width: 640px; height: 360px;">
+    </div>
+  </div>
+  <div id="value">0</div>
+
+  <!-- <img src="{{ url_for('test_angle_post') }}"> -->
+  <!-- <img src="{{ url_for('extracted_pose_guide_img') }}"> -->
+</body>
+
 </html>

@@ -46,6 +46,11 @@ def test_angle_post():
     return Response(angle_check_guide_test.run(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/test_angle_score')
+def test_angle_score():
+    score = angle_check_guide_test.get_score()
+    return jsonify({'value': score})
+
 @app.route('/extracted_pose_guide_img')
 def extracted_pose_guide_img():
     """showing extracted guide img."""
