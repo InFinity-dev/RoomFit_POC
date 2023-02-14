@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="{{ url_for('static', filename='login.css') }}" rel="stylesheet">
+
+</head>
+<body>
+
+<form class="loginform" action="{{ url_for('idpw_login') }}" method="post">
+    <div class="msg">{{ msg }}</div>
+    <br>
+    <input id="id" name="id" class="idinput" type="text"
+           placeholder="id를 입력하세요."/>
+    <input id="password" name="password" class="pwinput" type="password"
+           placeholder="비밀번호를 입력하세요"/>
+    <input type="submit" class="loginsubmit" value="로그인"></br>
+
+    <p class="option"><a class="bottom" href="{{url_for('register')}}">회원가입</a></p>
+</form>
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+    <link
+      href="{{ url_for('static', filename='register.css') }}"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <div class="blurback">
+      <h1>회원 가입</h1>
+      <form action="{{ url_for('register') }}" method="post">
+        <!--post 형태로 register 에 폼 내용 전달-->
+        <div class="msg">{{ msg }}</div>
+        <hr />
+        <div class="buttonwrap">
+          <p class="p_label">ID</p>
+          <input
+            id="idd"
+            name="idd"
+            type="text"
+            placeholder="ID를 입력하세요"
+            class="textbox"
+          />
+        </div>
+
+        <div class="buttonwrap">
+          <p class="p_label">비밀번호</p>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="비밀번호를 입력하세요"
+            class="textbox"
+          />
+        </div>
+        <br />
+
+        <input type="submit" class="button1" value="회원가입" />
+      </form>
+      <hr />
+      <p class="ask">
+        이미 계정을 가지고 계신가요?
+        <a href="{{ url_for('idpw_login') }}">로그인 하기</a>
+      </p>
+    </div>
+  </body>
+</html>
