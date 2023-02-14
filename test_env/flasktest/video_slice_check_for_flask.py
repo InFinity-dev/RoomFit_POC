@@ -145,7 +145,7 @@ def run(video_name):
 
     pose_num = 1
     save_path = f'./static/target_pose/{video_name}'
-    os.mkdir(save_path)
+    os.makedirs(save_path, exist_ok=True)
     print(len(vid_slice_info))
     print(vid_slice_info)
     for start, end, dur in vid_slice_info:
@@ -204,3 +204,5 @@ def run(video_name):
     #         pass
 
     #     cv2.waitKey(10)
+
+    return vid_slice_info

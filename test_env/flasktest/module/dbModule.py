@@ -8,13 +8,14 @@ class Database():
         self.db = pymysql.connect(host='localhost',
                                   user='root',
                                   password='para2150!',
-                                  db='testDB',
+                                  db='ROOMFIT_DB',
                                   charset='utf8')
         self.cursor = self.db.cursor(pymysql.cursors.DictCursor)
  
     def execute(self, query, args={}):
         self.cursor.execute(query, args)  
- 
+        return self.cursor.lastrowid
+        
     def executeOne(self, query, args={}):
         self.cursor.execute(query, args)
         row = self.cursor.fetchone()
