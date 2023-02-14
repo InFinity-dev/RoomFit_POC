@@ -6,6 +6,9 @@ import math
 from scipy import spatial
 import os
 
+# 현재 점수를 얻기 위한 전역변수
+score = 0
+
 # mediapipe 변수 설정
 mp_pose = mp.solutions.pose
 mp_draw = mp.solutions.drawing_utils
@@ -441,6 +444,10 @@ def diff_compare_angle(x, y):
         # print(new_x[i])
     return calc_average(new_x)
 
+# 현재 점수 return
+def get_score():
+    global score
+    return str(score)
 
 # 레거시 함수, 더 이상 안씀
 # def convert_data(landmarks):
@@ -617,14 +624,17 @@ def run():
             cv2.putText(img, str(int(angle7)), (1200,220), cv2.FONT_HERSHEY_SIMPLEX, 0.7, [0,153,0], 2, cv2.LINE_AA)
             cv2.putText(img, str(int(angle8)), (1200,250), cv2.FONT_HERSHEY_SIMPLEX, 0.7, [0,153,0], 2, cv2.LINE_AA)
 
+            global score
             if (p_score >= a_score):
                 # print('p_score >= a_score')
                 cv2.putText(img, str(int((1 - a_score) * 100)), (80, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0, 0, 255], 2,
                             cv2.LINE_AA)
+                score = int((1 - a_score) * 100)
             else:
                 # print('else 조건 분기 : p_score < a_score')
                 cv2.putText(img, str(int((1 - p_score) * 100)), (80, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0, 0, 255], 2,
                             cv2.LINE_AA)
+                score = int((1 - p_score) * 100)
 
         except:
             pass
