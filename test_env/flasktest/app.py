@@ -5,6 +5,8 @@ from flask import Flask, render_template, Response, jsonify, send_file, request,
 from flask import current_app as current_app
 from werkzeug.utils import secure_filename
 from module import dbModule
+import base64
+from io import BytesIO
 
 import angle_check_guide_test
 import extract_key_point_guide
@@ -22,6 +24,8 @@ app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.register_blueprint(test_db)
+
+db_class = dbModule.Database()
 
 @app.route('/')
 def index():
@@ -64,12 +68,12 @@ def upload_form():
 
 @app.route('/upload_video', methods=['POST'])
 def upload_video():
-    
-
     if 'file' not in request.files:
         flash('No file part')
         return redirect(request.url)
     file = request.files['file']
+    model_name = request.form['model_name']
+
     if file.filename == '':
         flash('No image selected for uploading')
         return redirect(request.url)
@@ -78,16 +82,49 @@ def upload_video():
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         print('upload_video filename: ' + filename)
         flash('Video successfully uploaded and displayed below')
+
+        file_name = file.filename.split(".")[0]
         extract_landmark_for_flask.run()
-        diff_extract_visualize_for_flask.run(file.filename.split(".")[0])
-        video_slice_check_for_flask.run(file.filename.split(".")[0])
+        diff_extract_visualize_for_flask.run(file_name)
+        vid_slice_info = video_slice_check_for_flask.run(file_name)
 
-        return render_template('upload.html', filename=filename)
+        total_pose_cnt = len(vid_slice_info)
+        total_time = sum(pose[2] for pose in vid_slice_info)
+        thumbnail = "./static/target_pose/" + file_name + "/pose_1.jpg"
+        sql      = "INSERT INTO ROOMFIT_DB.ROUTINE_MODEL(MODEL_NAME, TOTAL_POSE_CNT, TOTAL_TIME, THUMBNAIL) \
+                    VALUES('%s', '%d', '%d', '%s')" % (model_name, total_pose_cnt, total_time, thumbnail)
+        inserted_id = db_class.execute(sql)
 
-@app.route('/display/<filename>')
-def display_video(filename):
-	#print('display_video filename: ' + filename)
-	return redirect(url_for('static', filename='uploads/' + filename), code=301)
+        seq_num = 0
+        for pose in vid_slice_info:
+            seq_num += 1
+            pose_dur = pose[2]
+            file_path = "./static/target_pose/" + file_name + "/pose_" + str(seq_num) + ".jpg"
+            sql = "INSERT INTO ROOMFIT_DB.ROUTINE_MODEL_POSE(MODEL_ID, SEQ_NUM, POSE_DUR, FILE_SOURCE) \
+                    VALUES('%d', '%d', '%d', '%s')" % (inserted_id, seq_num, pose_dur, file_path)
+            db_class.execute(sql)
+        
+        db_class.commit()
+
+        return render_template('my_model_list.html', filename=filename)
+
+@app.route('/my_model_list')
+def my_model_list():
+    """my model list page."""
+    return render_template('my_model_list.html')
+
+@app.route('/models', methods=['GET'])
+def read_articles():
+    sql      = "SELECT MODEL_NAME, TOTAL_POSE_CNT, TOTAL_TIME, THUMBNAIL \
+                FROM ROOMFIT_DB.ROUTINE_MODEL"
+    result      = db_class.executeAll(sql)
+    print(result)
+    return jsonify({'result': 'success', 'models': result})
+
+# @app.route('/display/<filename>')
+# def display_video(filename):
+# 	#print('display_video filename: ' + filename)
+# 	return redirect(url_for('static', filename='uploads/' + filename), code=301)
 
 def gen():
     """Video streaming generator function."""
