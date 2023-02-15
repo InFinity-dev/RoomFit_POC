@@ -1,11 +1,11 @@
 import pymysql
-import pw_sec
+from module import pw_sec
 
 class Database():
     def __init__(self):
         self.db = pymysql.connect(host='localhost',
                                   user='root',
-                                  password=pw_sec.pw,
+                                  password=str(pw_sec.pw),
                                   db='ROOMFIT_DB',
                                   charset='utf8')
         self.cursor = self.db.cursor(pymysql.cursors.DictCursor)
