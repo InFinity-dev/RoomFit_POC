@@ -105,41 +105,25 @@
 </head>
 
 <body>
-  <h1>Streaming</h1>
-
+  <h1>자세 {{ poses[0].SEQ_NUM}} </h1>
   <div id="container">
     <div id="video">
-      <img src="{{ url_for('test_angle_post') }}" style="width: 100%; height: auto;">
+      <img src="{{ url_for('test_angle_video') }}" style="width: 1280px; height: 720px;">
     </div>
 
     <div id="position">
       <div>Current position:</div>
-      <img id="1" src="{{ url_for('static', filename='^^7.jpg') }}">
+      <img id="1" src="{{ poses[0].FILE_SOURCE }}">
       <div>Next position:</div>
-      <img id="2" src="{{ url_for('static', filename='^^7.jpg') }}">
+      <img id="2" src="{{ poses[1].FILE_SOURCE }}">
     </div>
   </div>
 
   <div id="info">
-    <a>Score = <span id="value">0</span></a>
+    <a>Score = <span id="accuracy_score">0</span></a>
     <a>Time = <span id="nowtime">0</span></a>
     <a>/</a>
     <a><span id="remaintime">0</span></a>
-  </div>
-  <h1>자세 {{ poses[1].SEQ_NUM}} </h1>
-  <h1 id="accuracy_score" style="color: red;">0</h1>
-  <div style="display:flex; flex-direction:row;">
-    <img src="{{ url_for('test_angle_video') }}" style="width: 1280px; height: 720px;">
-    <div>
-      <div class="container">
-        <img src="{{ poses[2].FILE_SOURCE }}" style="width: 640px; height: 360px;">
-        <div class="top-left">현재 자세</div>
-      </div>
-      <div class="container">
-        <img src="{{ poses[3].FILE_SOURCE }}" style="width: 640px; height: 360px;">
-        <div class="top-left">다음 자세</div>
-      </div>
-    </div>
   </div>
 </body>
 
