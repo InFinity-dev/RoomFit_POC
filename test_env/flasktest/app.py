@@ -97,14 +97,19 @@ def gen():
 @app.route('/test_angle')
 def test_angle_get():
     """Video streaming home page."""
+    given_model_id = int(request.args.get('model_id'))
+    return render_template('test_angle.html', model_id=given_model_id)
 
+@app.route('/test_angle_db')
+def test_angle_db():
     given_model_id = int(request.args.get('model_id'))
     sql      = "SELECT POSE_ID, MODEL_ID, SEQ_NUM, POSE_DUR, FILE_SOURCE \
                 FROM ROOMFIT_DB.ROUTINE_MODEL_POSE WHERE MODEL_ID = %d" % (given_model_id)
     result   = db_class.executeAll(sql)
     print("!!!!!!!!!!")
     print(result)
-    return render_template('test_angle.html',len = len(result), poses = result)
+
+    return jsonify({'len' : len(result), 'poses' : result})
 
 @app.route('/test_angle_video')
 def test_angle_video():
