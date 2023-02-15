@@ -1,36 +1,129 @@
+<!DOCTYPE html>
 <html>
 
 <head>
   <title>Streaming </title>
 
   <script>
+    // 즉시 새로고침해야할 변수들
     function updateValue() {
       fetch('/test_angle_score')
         .then(response => response.json())
         .then(data => {
           document.getElementById('value').textContent = data.value;
         });
+
+      fetch('/get_remain_time')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('remain').textContent = data.value;
+        });
     }
-    // 새로고침 시간
-    const term = 100
+    // Refresh time in milliseconds
+    const term = 100;
     setInterval(updateValue, term); 
   </script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      margin: 0;
+      padding: 10px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+    }
+
+    #container {
+      display: flex;
+      flex-direction: row;
+      height: calc(100vh - 70px);
+      background-color: #f7f7f7;
+    }
+
+    #video {
+      display: flex;
+      flex-grow: 1;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #position {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 25%;
+      background-color: #ddd;
+      color: #333;
+      font-size: 24px;
+    }
+
+    #position img {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      margin: 10px 0;
+    }
+
+    #info {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #333;
+      color: #fff;
+      font-size: 18px;
+      padding: 10px;
+    }
+
+    #info a {
+      margin: 0 20px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    #value {
+      color: #f7b733;
+    }
+
+    #nowtime {
+      color: #39e600;
+    }
+
+    #exceedtime {
+      color: #ff0000;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Streaming </h1>
+  <h1>Streaming</h1>
 
-  <div style="display:flex; flex-direction:row;">
-    <img src="{{ url_for('test_angle_post') }}" style="width: 1280px; height: 720px;">
-    <div style="display:flex; flex-direction:column;">
-      <img src="{{ url_for('static', filename='^^7.jpg') }}" style="width: 640px; height: 360px;">
-      <img src="{{ url_for('static', filename='^^7.jpg') }}" style="width: 640px; height: 360px;">
+  <div id="container">
+    <div id="video">
+      <img src="{{ url_for('test_angle_post') }}" style="width: 100%; height: auto;">
+    </div>
+
+    <div id="position">
+      <div>Current position:</div>
+      <img id="1" src="{{ url_for('static', filename='^^7.jpg') }}">
+      <div>Next position:</div>
+      <img id="2" src="{{ url_for('static', filename='^^7.jpg') }}">
     </div>
   </div>
-  <div id="value">0</div>
 
-  <!-- <img src="{{ url_for('test_angle_post') }}"> -->
-  <!-- <img src="{{ url_for('extracted_pose_guide_img') }}"> -->
+  <div id="info">
+    <a>Score = <span id="value">0</span></a>
+    <a>Time = <span id="nowtime">0</span></a>
+    <a>/</a>
+    <a><span id="remaintime">0</span></a>
+  </div>
 </body>
 
 </html>
