@@ -2,6 +2,7 @@ import os, jwt
 import cv2
 from flask import Flask, render_template, Response, jsonify, send_file, request, redirect, flash, url_for, Blueprint
 from flask import current_app as current_app, session
+from flask import render_template_string
 from werkzeug.utils import secure_filename
 import hashlib
 from datetime import datetime, timedelta
@@ -451,7 +452,6 @@ def face_model_gen():
 # 얼굴 인식 로그인 end
 
 # 데이터 스트림 테스트
-
 # generator 함수
 def generate():
     for i in range(100):
@@ -466,3 +466,77 @@ def generate():
 @app.route('/stream')
 def stream():
     return Response(generate(), mimetype='text/html')
+
+# 요것도 안됨
+@app.route('/stream_data_page')
+def stream_page():
+    return render_template('stream_data.html')
+
+@app.route('/stream_data_flask')
+def stream_flask():
+    return render_template_string('''<p>This is the current value: <span id="latest_value"></span></p>
+<script>
+
+    var latest = document.getElementById('latest_value');
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '{{ url_for('stream') }}');
+
+    xhr.onreadystatechange = function() {
+        var all_lines = xhr.responseText.split('\\n');
+        last_line = all_lines.length - 2
+        latest.textContent = all_lines[last_line]
+
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+            /*alert("The End of Stream");*/
+            latest.textContent = "The End of Stream"
+        }
+    }
+
+    xhr.send();
+
+</script>''')
+
+# AJAX Examples
+@app.route('/stream_time')
+def stream_time():
+    def generate_timestream():
+        while True:
+            current_time = time.strftime("%H:%M:%S\n")
+            print(current_time)
+            yield current_time
+            time.sleep(1)
+
+    return Response(generate_timestream(), mimetype='text/plain')
+
+
+# HTML에 AJAX로 뿌려주는건 안됨
+@app.route('/stream_time_page')
+def stream_time_page():
+    return render_template('stream_time.html')
+
+# flask에서 렌더링된 템플릿에 뿌려주는건 됨
+@app.route('/stream_time_flask')
+def stream_time_flask():
+    return render_template_string('''<p>This is the current value: <span id="latest_value"></span></p>
+<script>
+
+    var latest = document.getElementById('latest_value');
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '{{ url_for('stream_time') }}');
+
+    xhr.onreadystatechange = function() {
+        var all_lines = xhr.responseText.split('\\n');
+        last_line = all_lines.length - 2
+        latest.textContent = all_lines[last_line]
+
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+            /*alert("The End of Stream");*/
+            latest.textContent = "The End of Stream"
+        }
+    }
+
+    xhr.send();
+
+</script>''')

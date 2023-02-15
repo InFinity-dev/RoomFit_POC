@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Time Stream sync using AJAX</title>
+    됨<script>
+        var latest = document.getElementById('time');
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '{{ url_for('stream_time')}}');
+
+        xhr.onload = function() {
+            latest.textContent = xhr.responseText;
+        }
+        xhr.send();
+    </script>
+</head>
+<body>
+<p>플라스크로 부터 받은 현재 시간 : <span id="time"></span></p>
+</body>
+</html>
