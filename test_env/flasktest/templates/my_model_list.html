@@ -59,22 +59,23 @@
                         let models = response["models"];
                         console.log(models);
                         for (let i = 0; i < models.length; i++) {
-                            makeCard(models[i]["THUMBNAIL"], models[i]["MODEL_NAME"], models[i]["TOTAL_POSE_CNT"], models[i]["TOTAL_TIME"]);
+                            makeCard(models[i]["MODEL_ID"], models[i]["THUMBNAIL"], models[i]["MODEL_NAME"], models[i]["TOTAL_POSE_CNT"], models[i]["TOTAL_TIME"]);
                         }
                     }
                 })
             }
 
-            function makeCard(thumbnail, model_name, total_pose_cnt, total_time) {
+            function makeCard(model_id, thumbnail, model_name, total_pose_cnt, total_time) {
                 let tempHtml = ` <div class="card">
                                     <img class="card-img-top"
                                         src="${thumbnail}"
                                         alt="Card image cap">
                                     <div class="card-body">
-                                        <button type="button" class="btn btn-primary float-right" onclick="">운동하기</button>
+                                        <button type="button" class="btn btn-primary float-right" onclick="startModel(${model_id})" value="운동함">운동하기</button>
                                         <a href="#" class="card-title">${model_name}</a>
                                         <p class="card-text">동작수 : ${total_pose_cnt}</p>
                                         <p class="card-text">총시간 : ${total_time}</p>
+                                        <input type="hidden" id="${model_id}" class="input_model_id" value="${model_id}" >
                                     </div>
                                 </div>`;
                 $("#cards-box").append(tempHtml);
@@ -84,6 +85,23 @@
             function showModal() {
                 $('#upload_modal').modal('show');
             }
+            
+            function startModel(model_id) {
+                console.log(model_id);
+                $.ajax({
+                    type: "POST",
+                    url: "/model_poses",
+                    data: {given_model_id : "1"},
+                    success: function (response) {
+                        console.log(response["poses"]);
+                        poses = response["poses"];
+                        location.href = '/test_angle?pose_id=' + poses;
+                    }
+                    
+                });
+                location.href = '/test_angle?model_id=' + model_id;
+            }
+
         </script>
     </head>
 

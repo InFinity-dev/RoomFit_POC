@@ -97,10 +97,17 @@ def gen():
 @app.route('/test_angle')
 def test_angle_get():
     """Video streaming home page."""
-    return render_template('test_angle.html')
 
-@app.route('/test_angle_post')
-def test_angle_post():
+    given_model_id = int(request.args.get('model_id'))
+    sql      = "SELECT POSE_ID, MODEL_ID, SEQ_NUM, POSE_DUR, FILE_SOURCE \
+                FROM ROOMFIT_DB.ROUTINE_MODEL_POSE WHERE MODEL_ID = %d" % (given_model_id)
+    result   = db_class.executeAll(sql)
+    print("!!!!!!!!!!")
+    print(result)
+    return render_template('test_angle.html',len = len(result), poses = result)
+
+@app.route('/test_angle_video')
+def test_angle_video():
     """angle check guide."""
     
     return Response(angle_check_guide_test.run(),
@@ -178,8 +185,8 @@ def my_model_list():
     return render_template('my_model_list.html')
 
 @app.route('/models', methods=['GET'])
-def read_articles():
-    sql      = "SELECT MODEL_NAME, TOTAL_POSE_CNT, TOTAL_TIME, THUMBNAIL \
+def read_models():
+    sql      = "SELECT MODEL_ID, MODEL_NAME, TOTAL_POSE_CNT, TOTAL_TIME, THUMBNAIL \
                 FROM ROOMFIT_DB.ROUTINE_MODEL"
     result      = db_class.executeAll(sql)
     print(result)

@@ -5,12 +5,14 @@
   <title>Streaming </title>
 
   <script>
-    // 즉시 새로고침해야할 변수들
+    let poses = '{{ poses }}'
+
+    console.log(poses);
     function updateValue() {
       fetch('/test_angle_score')
         .then(response => response.json())
         .then(data => {
-          document.getElementById('value').textContent = data.value;
+          document.getElementById('accuracy_score').textContent = "자세 점수 : " + data.value;
         });
 
       fetch('/get_remain_time')
@@ -123,6 +125,21 @@
     <a>Time = <span id="nowtime">0</span></a>
     <a>/</a>
     <a><span id="remaintime">0</span></a>
+  </div>
+  <h1>자세 {{ poses[1].SEQ_NUM}} </h1>
+  <h1 id="accuracy_score" style="color: red;">0</h1>
+  <div style="display:flex; flex-direction:row;">
+    <img src="{{ url_for('test_angle_video') }}" style="width: 1280px; height: 720px;">
+    <div>
+      <div class="container">
+        <img src="{{ poses[2].FILE_SOURCE }}" style="width: 640px; height: 360px;">
+        <div class="top-left">현재 자세</div>
+      </div>
+      <div class="container">
+        <img src="{{ poses[3].FILE_SOURCE }}" style="width: 640px; height: 360px;">
+        <div class="top-left">다음 자세</div>
+      </div>
+    </div>
   </div>
 </body>
 
