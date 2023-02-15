@@ -460,7 +460,7 @@ def get_score():
 #                         }, ignore_index=True)
 #     return df
 
-def run(folder_path, seq_num):
+def run(poses):
     CAMERA_DEVICE_ID = 0
     cap = cv2.VideoCapture(CAMERA_DEVICE_ID)
 
@@ -468,8 +468,10 @@ def run(folder_path, seq_num):
     # file_list_image = [file for file in file_list if file.endswith(('.jpg', 'jpeg', '.png'))]
     # file_list_image.sort()
     # print(f'Target Pose 이미지 목록 : {file_list_image}\n')
-
-    target_pose_image = f"pose_{seq_num}.jpg"
+    print(poses)
+    
+    folder_path = "./static/target_pose/phw_clip/"
+    target_pose_image = "pose_1.jpg"
     print("!!!!!!!!!!!!!!!!!!!")
     print(folder_path)
     print(target_pose_image)
