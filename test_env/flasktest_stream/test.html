@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>test</title>
+    <script>
+        var latest = document.getElementById('test');
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '{{ url_for('test')}}');
+
+        xhr.onload = function() {
+            latest.textContent = xhr.responseText;
+        }
+        xhr.send();
+    </script>
+  </head>
+  <body>
+    <p>This is the current value: <span id="test"></span></p>
+  </body>
+</html>
+

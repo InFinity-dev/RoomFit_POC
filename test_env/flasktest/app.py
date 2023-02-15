@@ -1,7 +1,8 @@
 import os, jwt
-import cv2 
+import cv2
 from flask import Flask, render_template, Response, jsonify, send_file, request, redirect, flash, url_for, Blueprint
 from flask import current_app as current_app, session
+from flask import render_template_string
 from werkzeug.utils import secure_filename
 import hashlib
 from datetime import datetime, timedelta
@@ -106,7 +107,7 @@ def gen():
         #time.sleep(0.1)
         key = cv2.waitKey(20)
         if key == 27:
-           break
+            break
 
 # 비디오 스트리밍 예제 end
 
@@ -145,8 +146,7 @@ def extracted_current_pose_guide_img():
 
 @app.route('/extracted_next_pose_guide_img')
 def extracted_next_pose_guide_img():
-    return Response(extract_key_point_guide.ret_image(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(extract_key_point_guide.ret_image(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # 포즈 끝 감지를 위한 전역변수
 detect_seq_num = -1
@@ -394,7 +394,7 @@ def extracted_pose_guide_img():
 # 비디오 업로드 및 자세 추출 start
 @app.route('/upload_video', methods=['GET'])
 def upload_form():
-	return render_template('upload.html')
+    return render_template('upload.html')
 
 @app.route('/upload_video', methods=['POST'])
 def upload_video():
@@ -433,7 +433,7 @@ def upload_video():
             sql = "INSERT INTO ROOMFIT_DB.ROUTINE_MODEL_POSE(MODEL_ID, SEQ_NUM, POSE_DUR, FILE_SOURCE) \
                     VALUES('%d', '%d', '%d', '%s')" % (inserted_id, seq_num, pose_dur, file_path)
             db_class.execute(sql)
-        
+
         db_class.commit()
 
         return render_template('my_model_list.html', filename=filename)
@@ -470,7 +470,7 @@ def register():
             id_receive = request.form['idd']
             pw_receive = request.form['password']
             pw_hash=hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
-            
+
             sql = "SELECT USER_NAME, PASSWORD FROM ROOMFIT_DB.ROOMFIT_USER WHERE USER_NAME = %s"
             result = db_class.executeOne(sql, (id_receive))
 
@@ -483,7 +483,7 @@ def register():
 
                 msg = '성공적으로 가입되었습니다!'
                 return render_template('face_register.html', msg = msg, idd=id_receive) # home으로 연동
-            
+
         else:
             msg = '모든 항목을 기입해 주세요!'
     return render_template('register.html', msg = msg)
@@ -507,20 +507,20 @@ def login():
             if result:
                 session['loggedin'] = True
                 session['USER_NAME'] = result['USER_NAME']
-                
+
                 token = jwt.encode({
                     'id':id_receive,
                     'expiration': str(datetime.utcnow() + timedelta(seconds=60 * 60 * 24))
                 },
                     app.config['SECRET_KEY'],
                     algorithm='HS256')
-                
+
                 msg = '성공적으로 로그인 되었습니다!'
                 return render_template('my_model_list.html', msg=msg)
-                
+
             else:
                 msg = '휴대폰 번호 / 비밀번호가 일치하지 않습니다!'
-                
+
     return render_template('login.html', msg = msg)
 
 # id/pw 로그인 end
@@ -543,15 +543,15 @@ def get_face_data():
 
 def face_data(user_name):
     global isFaceR
-    
+
     cap = cv2.VideoCapture(0)
     cap.set(3, 640)
     cap.set(4, 480)
-    
+
     save_path = f'./static/face_training/dataset/{user_name}'
     if not os.path.isdir(save_path):
         os.mkdir(save_path)
-    
+
     count=0
     face_detector = cv2.CascadeClassifier('./static/face_training/haarcascade_frontalface_default.xml')
     # Read until video is completed
@@ -560,13 +560,13 @@ def face_data(user_name):
         img = cv2.flip(img, 1)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = face_detector.detectMultiScale(gray, 1.3, 5)
-        
+
         for (x,y,w,h) in faces:
             cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
             # 얼굴이 인식되면 카운터 증가
             count += 1
             cv2.imwrite(f'{save_path}/' + str(count).zfill(3) + ".jpg", gray[y:y+h,x:x+w])
-        
+
         frame = cv2.imencode('.jpg', img)[1].tobytes()
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
@@ -581,23 +581,23 @@ def face_training():
     dataset_path = './static/face_training/dataset'
     user_list = os.listdir(dataset_path)
     user_list = [user for user in user_list if
-                        os.path.isdir(os.path.join(dataset_path, user))]
+                 os.path.isdir(os.path.join(dataset_path, user))]
     user_list.sort()
     user_list_pd = pd.DataFrame(user_list, columns=['user'])
     user_list_pd.to_csv('./static/face_training/model_user_list.csv', index=True)
-    
+
     trainset_path = './static/face_training/train_data'
     model_exist_check = os.path.join(trainset_path, 'user_face_model.yml')
-    
+
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     detector = cv2.CascadeClassifier("./static/face_training/haarcascade_frontalface_default.xml")
-    
+
     target_images = []
     facesamples = []
     id = []
-    
+
     img_count = 0
-    
+
     for user in user_list:
         img_path = os.path.join(dataset_path,user)
     img_list = os.listdir(img_path)
@@ -621,7 +621,7 @@ def face_training():
     recognizer.train(facesamples, np.array(id))
     # trainset_path 에 유저 이름으로 인식 모델 저장
     recognizer.write(f'{trainset_path}/user_face_model.yml')
-    return 
+    return
 # 얼굴 인식 등록 end
 
 # 얼굴 인식 로그인 start
@@ -638,7 +638,7 @@ def face_login():
             return render_template('login.html')
         return render_template('face_login.html',msg="확인")
     return render_template('my_model_list.html')
-    
+
 @app.route('/face_cognize', methods =['GET', 'POST'])
 def face_cognize():
     """Video streaming route. Put this in the src attribute of an img tag."""
@@ -649,23 +649,23 @@ def face_model_gen():
     global isFaceL,FaceLtimeout
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     recognizer.read('./static/face_training/train_data/user_face_model.yml')
-    
+
     cascadePath = "./static/face_training/haarcascade_frontalface_default.xml"
     faceCascade = cv2.CascadeClassifier(cascadePath)
-    
+
     user_list = pd.read_csv('./static/face_training/model_user_list.csv')
     names = user_list['user'].tolist()
-    
-    cap = cv2.VideoCapture(0)    
+
+    cap = cv2.VideoCapture(0)
     cap.set(3, 640)
     cap.set(4, 480)
-    
+
     fps = cap.get(cv2.CAP_PROP_FPS)
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     font = cv2.FONT_HERSHEY_SIMPLEX
     minW = 0.1*cap.get(3)
     minH = 0.1*cap.get(4)
-    
+
     frame_cnt=0
     confidence_cnt=0
     while (cap.isOpened()): # 제한시간설정
@@ -674,17 +674,17 @@ def face_model_gen():
             time.sleep(1)
             isFaceL=True
             break
-        
+
         ret, img = cap.read()
         img = cv2.flip(img, 1)
         gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-        
+
         faces = faceCascade.detectMultiScale(
-        gray,
-        scaleFactor = 1.2,
-        minNeighbors = 5,
-        minSize = (int(minW), int(minH)),
-       )
+            gray,
+            scaleFactor = 1.2,
+            minNeighbors = 5,
+            minSize = (int(minW), int(minH)),
+        )
 
         for(x,y,w,h) in faces:
             cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
@@ -700,10 +700,10 @@ def face_model_gen():
 
             cv2.putText(img, str(id), (x+5,y-5), font, 1, (255,255,255), 2)
             cv2.putText(img, str(confidence), (x+5,y+h-5), font, 1, (255,255,0), 1)
-        
-        frame = cv2.imencode('.jpg', img)[1].tobytes()    
+
+        frame = cv2.imencode('.jpg', img)[1].tobytes()
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-    
+
     time.sleep(1)
     FaceLtimeout=True
 # 얼굴 인식 로그인 end
@@ -1137,3 +1137,93 @@ def get_score():
     return str(score)
 
 # angle check 필요 함수 end
+
+# 데이터 스트림 테스트
+# generator 함수
+def generate():
+    for i in range(100):
+        # 1초 딜레이
+        time.sleep(1)
+        yield f'<p>{i}</p>\n'
+
+# TODO : 위 변수를 받아서 페이지 리로딩 없이 HTML에 렌더링 하는게 목표
+# 1. 변수로 받는 방법 - HTML 요소로 바로 되는지? 비디오 스트림 img src로 받아온것 처럼
+#                 - 자바스크립트 변수로 받아야 되는지?
+# 2. 대안 : iframe 으로 리로딩 되어야 할 부분만 만들어서 거기다가 넣고 리로딩
+@app.route('/stream')
+def stream():
+    return Response(generate(), mimetype='text/html')
+
+# 요것도 안됨
+@app.route('/stream_data_page')
+def stream_page():
+    return render_template('stream_data.html')
+
+@app.route('/stream_data_flask')
+def stream_flask():
+    return render_template_string('''<p>This is the current value: <span id="latest_value"></span></p>
+<script>
+
+    var latest = document.getElementById('latest_value');
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '{{ url_for('stream') }}');
+
+    xhr.onreadystatechange = function() {
+        var all_lines = xhr.responseText.split('\\n');
+        last_line = all_lines.length - 2
+        latest.textContent = all_lines[last_line]
+
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+            /*alert("The End of Stream");*/
+            latest.textContent = "The End of Stream"
+        }
+    }
+
+    xhr.send();
+
+</script>''')
+
+# AJAX Examples
+@app.route('/stream_time')
+def stream_time():
+    def generate_timestream():
+        while True:
+            current_time = time.strftime("%H:%M:%S\n")
+            print(current_time)
+            yield current_time
+            time.sleep(1)
+
+    return Response(generate_timestream(), mimetype='text/plain')
+
+
+# HTML에 AJAX로 뿌려주는건 안됨
+@app.route('/stream_time_page')
+def stream_time_page():
+    return render_template('stream_time.html')
+
+# flask에서 렌더링된 템플릿에 뿌려주는건 됨
+@app.route('/stream_time_flask')
+def stream_time_flask():
+    return render_template_string('''<p>This is the current value: <span id="latest_value"></span></p>
+<script>
+
+    var latest = document.getElementById('latest_value');
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '{{ url_for('stream_time') }}');
+
+    xhr.onreadystatechange = function() {
+        var all_lines = xhr.responseText.split('\\n');
+        last_line = all_lines.length - 2
+        latest.textContent = all_lines[last_line]
+
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+            /*alert("The End of Stream");*/
+            latest.textContent = "The End of Stream"
+        }
+    }
+
+    xhr.send();
+
+</script>''')
