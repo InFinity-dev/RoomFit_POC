@@ -11,7 +11,7 @@
       <!--post 형태로 register 에 폼 내용 전달-->
       <div class="msg">{{ idd }}님 {{ msg }}</div>
 
-      <img src="{{ url_for('face_register', user_name=idd) }}" />
+      <img src="{{ url_for('get_face_data', user_name=idd) }}" />
       <p>얼굴 인식 데이터를 수집하는 중입니다. 카메라를 바라봐 주세요</p>
     </div>
   </body>

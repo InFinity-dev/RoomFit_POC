@@ -6,6 +6,8 @@ from werkzeug.utils import secure_filename
 import hashlib
 from datetime import datetime, timedelta
 from functools import wraps
+import time
+
 from PIL import Image
 import pandas as pd
 import numpy as np
@@ -32,10 +34,10 @@ db_class = dbModule.Database()
 
 # 비디오 스트리밍 예제 start
 
-@app.route('/')
-def index():
-    """Video streaming home page."""
-    return render_template('index.html')
+# @app.route('/')
+# def index():
+#     """Video streaming home page."""
+#     return render_template('index.html')
 
 @app.route('/video_feed')
 def video_feed():
@@ -93,7 +95,6 @@ def gen():
 # 비디오 스트리밍 예제 end
 
 # 자세 일치도 예제 start
-
 @app.route('/test_angle')
 def test_angle_get():
     """Video streaming home page."""
@@ -121,7 +122,6 @@ def extracted_pose_guide_img():
 # 자세 일치도 예제 end
 
 # 비디오 업로드 및 자세 추출 start
-
 @app.route('/upload_video', methods=['GET'])
 def upload_form():
 	return render_template('upload.html')
@@ -171,7 +171,6 @@ def upload_video():
 # 비디오 업로드 및 자세 추출 end
 
 # 내 모델 리스트 출력 화면 start
-
 @app.route('/my_model_list')
 def my_model_list():
     """my model list page."""
@@ -188,7 +187,6 @@ def read_articles():
 # 내 모델 리스트 출력 화면 end
 
 # 회원가입 및 얼굴인식 start
-
 #------
 # 1.회원가입
 # 웹캠으로 유저 데이터 뽑아서 모델 학습시키기
@@ -214,7 +212,7 @@ def register():
                 db_class.commit()
 
                 msg = '성공적으로 가입되었습니다!'
-                return render_template('login.html', msg = msg, idd=id_receive) # home으로 연동
+                return render_template('face_register.html', msg = msg, idd=id_receive) # home으로 연동
             
         else:
             msg = '모든 항목을 기입해 주세요!'
@@ -223,10 +221,8 @@ def register():
 # 회원가입 및 얼굴인식 end
 
 # id/pw 로그인 start
-
-# id/pw 로그인
-@app.route('/idpw_login', methods =['GET', 'POST'])
-def idpw_login():
+@app.route('/login', methods =['GET', 'POST'])
+def login():
     auth = request.authorization
     msg = ''
     if request.method == 'POST':
@@ -260,16 +256,24 @@ def idpw_login():
 # id/pw 로그인 end
 
 # 얼굴 인식 등록 start
-
-# Face ID 등록
+isFaceR=False
 @app.route('/face_register', methods =['GET', 'POST'])
 def face_register():
+    global isFaceR
+    isFaceR=False
+    while not isFaceR:
+        return render_template('face_register.html')
+    return render_template('login.html')
+
+@app.route('/get_face_data', methods =['GET', 'POST'])
+def get_face_data():
     """Video streaming route. Put this in the src attribute of an img tag."""
     un = request.args.get('user_name', default = 'ns-abc-aaa', type = str)
-    return Response(face_data(un),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(face_data(un),mimetype='multipart/x-mixed-replace; boundary=frame')
 
 def face_data(user_name):
+    global isFaceR
+    
     cap = cv2.VideoCapture(0)
     cap.set(3, 640)
     cap.set(4, 480)
@@ -278,8 +282,8 @@ def face_data(user_name):
     if not os.path.isdir(save_path):
         os.mkdir(save_path)
     
+    count=0
     face_detector = cv2.CascadeClassifier('./static/face_training/haarcascade_frontalface_default.xml')
-    count = 0
     # Read until video is completed
     while(cap.isOpened()):
         ret, img = cap.read()  # import image
@@ -298,7 +302,9 @@ def face_data(user_name):
 
         if count >= 30:
             face_training()
-            print("얼굴등록 완료")
+            print(isFaceR)
+            time.sleep(1)
+            isFaceR=True
             break
 
 def face_training():
@@ -333,39 +339,44 @@ def face_training():
         print(img_to_path)
         img_count += 1
         image = cv2.imread(img_to_path)
-        cv2.imshow('training face',image)
-        cv2.waitKey(100)
-        cv2.destroyAllWindows()
 
         # 그레이 스케일로 변환
         PIL_img = Image.open(img_to_path).convert('L')
-
         img_numpy = np.array(PIL_img,'uint8')
-
         faces = detector.detectMultiScale(img_numpy)
         for (x,y,w,h) in faces:
             facesamples.append(img_numpy[y:y+h,x:x+w])
             id.append(user_list.index(user))
 
     recognizer.train(facesamples, np.array(id))
-    
     # trainset_path 에 유저 이름으로 인식 모델 저장
     recognizer.write(f'{trainset_path}/user_face_model.yml')
-
+    return 
 # 얼굴 인식 등록 end
 
 # 얼굴 인식 로그인 start
-
 # 4. faceID 로그인
 # 정해진 시간안에 일치율이 넘으면 그냥 로그인
 # 안되면 id/pw 로그인 창으로 넘어가기
+isFaceL,FaceLtimeout=False, False
 @app.route('/face_login')
 def face_login():
+    global isFaceL,FaceLtimeout
+    isFaceL,FaceLtimeout=False, False
+    while not isFaceL:
+        if FaceLtimeout:
+            return render_template('login.html')
+        return render_template('face_login.html',msg="확인")
+    return render_template('my_model_list.html')
+    
+@app.route('/face_cognize', methods =['GET', 'POST'])
+def face_cognize():
     """Video streaming route. Put this in the src attribute of an img tag."""
     return Response(face_model_gen(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 def face_model_gen():
+    global isFaceL,FaceLtimeout
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     recognizer.read('./static/face_training/train_data/user_face_model.yml')
     
@@ -375,25 +386,23 @@ def face_model_gen():
     user_list = pd.read_csv('./static/face_training/model_user_list.csv')
     names = user_list['user'].tolist()
     
-    CAMERA_DEVICE_ID = 0
-    cap = cv2.VideoCapture(CAMERA_DEVICE_ID)
-    
-    # video width
+    cap = cv2.VideoCapture(0)    
     cap.set(3, 640)
-    # video height
     cap.set(4, 480)
     
     fps = cap.get(cv2.CAP_PROP_FPS)
+    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     font = cv2.FONT_HERSHEY_SIMPLEX
     minW = 0.1*cap.get(3)
     minH = 0.1*cap.get(4)
     
     frame_cnt=0
     confidence_cnt=0
-    while (frame_cnt<=fps*180): # 제한시간설정
+    while (cap.isOpened()): # 제한시간설정
         frame_cnt+=1
-        if confidence_cnt > fps*180/3:
-            print("login 성공")
+        if confidence_cnt > fps*frame_count*30/10:
+            time.sleep(1)
+            isFaceL=True
             break
         
         ret, img = cap.read()
@@ -424,5 +433,7 @@ def face_model_gen():
         
         frame = cv2.imencode('.jpg', img)[1].tobytes()    
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
+    
+    time.sleep(1)
+    FaceLtimeout=True
 # 얼굴 인식 로그인 end

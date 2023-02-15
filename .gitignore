@@ -5,6 +5,9 @@
 /target_video/bom_test_1.mp4/
 /target_video/bom_test_2.mp4/
 *.pyc
+/flasktest_bom/static
+/flasktest_bom/dataset
+/flasktest_bom/__pycache__
 /face_id_login/dataset/bom/
 /face_id_login/dataset/cksdn/
 /face_id_login/dataset/chan/
