@@ -5,25 +5,64 @@
   <title>Streaming </title>
 
   <script>
-    let poses = '{{ poses }}'
-    let seq_num = "{{ seq_num }}"
-    console.log(poses[seq_num]);
+    let now_index = 0;
+    let score = 0
+
+    let poses
+    let len
+
+    window.addEventListener('load', function load() {
+      // const now_remain = document.getElementById('remain_time')
+      // const progressBar = document.getElementById("progress-bar");
+
+      // now_remain.value = 0;
+      // progressBar.max = 0;
+
+      fetch('/test_angle_db?model_id=' + '{{ model_id }}')
+        .then(response => response.json())
+        .then(data => {
+          poses = data.poses;
+          len = data.len
+          console.log(poses);
+        });
+    });
+
     function updateValue() {
       fetch('/test_angle_score')
         .then(response => response.json())
         .then(data => {
-          document.getElementById('accuracy_score').textContent = "자세 점수 : " + data.value;
+          score = data.value;
+          document.getElementById('accuracy_score').textContent = data.value;
         });
-
-      fetch('/get_remain_time')
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('remain').textContent = data.value;
-        });
+      if (score >= 60) {
+        progressBar.value--;
+      }
     }
     // Refresh time in milliseconds
     const term = 100;
-    setInterval(updateValue, term); 
+    setInterval(updateValue, term);
+
+    // // Add an event listener to the progress bar
+    // progressBar.addEventListener("input", function updateProgress() {
+    //   if (progressBar.value == progressBar.max) {
+    //     // Increment the now_index variable to move to the next pose
+    //     now_index++;
+    //     // Check if the now_index variable is within the bounds of the poses array
+    //     if (now_index >= poses.length) {
+    //       now_index = -1;
+    //     }
+    //     // Update the maximum value of the progress bar to the new POSE_DUR
+    //     progressBar.max = poses[now_index].POSE_DUR;
+    //     // Reset the progress bar's value to 0
+    //     progressBar.value = 0;
+    //     if (now_index == -1) {
+    //       progressBar.value = "End";
+    //     }
+    //   }
+    //   if (progressBar.value % 10 == 0) {
+    //     now_remain.textContent = now_remain.textContent - 1
+    //   }
+    // });
   </script>
 
   <style>
@@ -66,13 +105,6 @@
       font-size: 24px;
     }
 
-    #position img {
-      width: 100%;
-      max-width: 300px;
-      height: auto;
-      margin: 10px 0;
-    }
-
     #info {
       display: flex;
       justify-content: center;
@@ -83,29 +115,14 @@
       padding: 10px;
     }
 
-    #info a {
-      margin: 0 20px;
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    #value {
-      color: #f7b733;
-    }
-
-    #nowtime {
+    #remaintime {
       color: #39e600;
-    }
-
-    #exceedtime {
-      color: #ff0000;
     }
   </style>
 </head>
 
 <body>
-  <h1>자세 {{ poses[seq_num - 1].SEQ_NUM}} </h1>
+  <h1>자세 1</h1>
   <div id="container">
     <div id="video">
       <img src="{{ url_for('test_angle_video', folder_path = folder_path, seq_num = seq_num) }}" style="width: 1280px; height: 720px;">
@@ -113,17 +130,18 @@
 
     <div id="position">
       <div>Current position:</div>
-      <img id="1" src="{{ poses[seq_num - 1].FILE_SOURCE }}">
+      <img id="1" src="https://www.google.com/webhp?hl=ko&sa=X&ved=0ahUKEwir-d2lyZf9AhUJCd4KHWT8A3IQPAgI">
       <div>Next position:</div>
-      <img id="2" src="{{ poses[seq_num].FILE_SOURCE }}">
+      <img id="2" src="https://www.google.com/webhp?hl=ko&sa=X&ved=0ahUKEwir-d2lyZf9AhUJCd4KHWT8A3IQPAgI">
     </div>
   </div>
 
   <div id="info">
     <a>Score = <span id="accuracy_score">0</span></a>
-    <a>Time = <span id="nowtime">0</span></a>
-    <a>/</a>
-    <a><span id="remaintime">0</span></a>
+    <a>Time = <span id="remain_time">0</span></a>
+    <div id="progress-bar-container">
+      <progress id="progress-bar" value="0" max="100"></progress>
+    </div>
   </div>
 </body>
 

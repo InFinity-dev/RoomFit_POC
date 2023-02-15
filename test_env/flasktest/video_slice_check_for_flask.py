@@ -54,7 +54,7 @@ def run(video_name):
     cap = cv2.VideoCapture(video_path)
 
     # 비디오 정보 가져오기
-    info = ffmpeg.probe(video_path)
+    # info = ffmpeg.probe(video_path)
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -62,7 +62,7 @@ def run(video_name):
 
     # 영상 정보 출력하기
     print(f'>>> 파일 정보')
-    print(f"{info['format']['duration']} (초) 의 재생시간을 가지는 비디오 입니다.")
+    # print(f"{info['format']['duration']} (초) 의 재생시간을 가지는 비디오 입니다.")
     print(f'{frame_count} 개의 프레임을 가지는 비디오 입니다.')
     print(f'{width} x {height}의 해상도를 가지는 비디오 입니다.')
     print('FPS:', fps)
