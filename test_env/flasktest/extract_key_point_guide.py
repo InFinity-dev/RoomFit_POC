@@ -260,8 +260,8 @@ def extractKeypoint(path):
     return landmarks, keypoints, angle, image
 
 def ret_image():
-    folder_path = '../../target_pose'
-    target_pose_image = "^^7.jpg"
+    folder_path = './static/target_pose/phw_clip/'
+    target_pose_image = "pose_1.jpg"
 
     image_path = os.path.join(folder_path, target_pose_image)
 

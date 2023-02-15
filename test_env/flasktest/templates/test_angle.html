@@ -8,37 +8,46 @@
     let now_index = 0;
     let score = 0
 
-    let poses
-    let len
+    let len = 0
+    let folder_path = ""
+    let seq_num = 1
 
-    window.addEventListener('load', function load() {
-      // const now_remain = document.getElementById('remain_time')
-      // const progressBar = document.getElementById("progress-bar");
+    // window.addEventListener('load', function load() {
+    //   // const now_remain = document.getElementById('remain_time')
+    //   // const progressBar = document.getElementById("progress-bar");
 
-      // now_remain.value = 0;
-      // progressBar.max = 0;
+    //   // now_remain.value = 0;
+    //   // progressBar.max = 0;
 
-      fetch('/test_angle_db?model_id=' + '{{ model_id }}')
-        .then(response => response.json())
-        .then(data => {
-          poses = data.poses;
-          len = data.len
-          console.log(poses);
-        });
-    });
+    //   fetch('/test_angle_db?model_id=' + '{{ model_id }}')
+    //     .then(response => response.json())
+    //     .then(data => {
+    //       poses = data.poses;
+    //       len = data.len
+    //       folder_path = data.folder_path
+    //       seq_num = data.seq_num
+    //       console.log(data);
+    //     });
+    // });
 
     function updateValue() {
-      fetch('/test_angle_score')
+      fetch('/detect_seq_num')
         .then(response => response.json())
         .then(data => {
-          score = data.value;
-          document.getElementById('accuracy_score').textContent = data.value;
+          pose_seq_num = data.value;
+          cur_pose_img_path = data.cur_img_path;
+          next_pose_img_path = data.next_img_path;
+          console.log(pose_seq_num)
+          console.log(cur_pose_img_path)
+          console.log(next_pose_img_path)
+          document.getElementById("current_pose_img").src = cur_pose_img_path; 
+          document.getElementById("next_pose_img").src = next_pose_img_path; 
+          // $("#current_pose_img").attr('src', cur_pose_img_path)
+          // $("#next_pose_img").attr('src', next_pose_img_path)
         });
-      if (score >= 60) {
-        progressBar.value--;
-      }
     }
-    // Refresh time in milliseconds
+
+    //Refresh time in milliseconds
     const term = 100;
     setInterval(updateValue, term);
 
@@ -125,14 +134,14 @@
   <h1>자세 1</h1>
   <div id="container">
     <div id="video">
-      <img src="{{ url_for('test_angle_video') }}" style="width: 1280px; height: 720px;">
+      <img id="angle_video" src="{{ url_for('test_angle_video', model_id = model_id) }}" style="width: 1280px; height: 720px;">
     </div>
 
     <div id="position">
       <div>Current position:</div>
-      <img id="1" src="https://www.google.com/webhp?hl=ko&sa=X&ved=0ahUKEwir-d2lyZf9AhUJCd4KHWT8A3IQPAgI">
+      <img id="current_pose_img" src="" style="width: 400px; height: 250px;">
       <div>Next position:</div>
-      <img id="2" src="https://www.google.com/webhp?hl=ko&sa=X&ved=0ahUKEwir-d2lyZf9AhUJCd4KHWT8A3IQPAgI">
+      <img id="next_pose_img" src="" style="width: 400px; height: 250px;">
     </div>
   </div>
 
@@ -143,6 +152,8 @@
       <progress id="progress-bar" value="0" max="100"></progress>
     </div>
   </div>
+
+  
 </body>
 
 </html>
