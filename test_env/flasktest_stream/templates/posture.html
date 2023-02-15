@@ -1,0 +1,17 @@
+<html>
+
+<head>
+    <title>Posture Detection</title>
+</head>
+
+<body>
+    <h1>Posture Detection</h1>
+    <video id="video" width="320" height="240" autoplay></video>
+    <p>Your current posture: {{ posture }}</p>
+</body>
+<script>
+    var frame = "{{ frame }}";
+    document.getElementById('frame').src = frame;
+</script>
+
+</html>
