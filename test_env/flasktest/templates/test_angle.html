@@ -8,8 +8,10 @@
     let now_index = 0;
     let score = 0
 
-    let poses
-    let len
+    let poses = {}
+    let len = 0
+    let folder_path = ""
+    let seq_num = 1
 
     window.addEventListener('load', function load() {
       // const now_remain = document.getElementById('remain_time')
@@ -23,7 +25,9 @@
         .then(data => {
           poses = data.poses;
           len = data.len
-          console.log(poses);
+          folder_path = data.folder_path
+          seq_num = data.seq_num
+          console.log(data);
         });
     });
 
@@ -63,6 +67,14 @@
     //     now_remain.textContent = now_remain.textContent - 1
     //   }
     // });
+    $.ajax({
+      type: "GET",
+      url: "/test_angle_video",
+      data: {folder_path : folder_path, seq_num : seq_num},
+      success: function (response) {
+          
+      }
+    })
   </script>
 
   <style>
@@ -125,7 +137,7 @@
   <h1>자세 1</h1>
   <div id="container">
     <div id="video">
-      <img src="{{ url_for('test_angle_video', folder_path = folder_path, seq_num = seq_num) }}" style="width: 1280px; height: 720px;">
+      <img id="angle_video" src="{{ url_for('test_angle_video', folder_path = folder_path, seq_num = seq_num) }}" style="width: 1280px; height: 720px;">
     </div>
 
     <div id="position">
@@ -143,6 +155,8 @@
       <progress id="progress-bar" value="0" max="100"></progress>
     </div>
   </div>
+
+  
 </body>
 
 </html>

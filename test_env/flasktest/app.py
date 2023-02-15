@@ -110,7 +110,7 @@ def test_angle_db():
     folder_path = result[0]['FILE_SOURCE'].split("/")
     folder_path = f"{folder_path[0]}/{folder_path[1]}/{folder_path[2]}/{folder_path[3]}"
 
-    return render_template('test_angle.html',len = len(result), poses = result, folder_path = folder_path, seq_num = 1)
+    return jsonify({'len' : len(result), 'poses' : result, 'folder_path' : folder_path, 'seq_num' : 1})
 
 @app.route('/test_angle_video')
 def test_angle_video():

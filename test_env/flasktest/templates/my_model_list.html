@@ -88,17 +88,6 @@
             
             function startModel(model_id) {
                 console.log(model_id);
-                $.ajax({
-                    type: "POST",
-                    url: "/model_poses",
-                    data: {given_model_id : "1"},
-                    success: function (response) {
-                        console.log(response["poses"]);
-                        poses = response["poses"];
-                        location.href = '/test_angle?pose_id=' + poses;
-                    }
-                    
-                });
                 location.href = '/test_angle?model_id=' + model_id;
             }
 
