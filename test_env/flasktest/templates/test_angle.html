@@ -6,8 +6,8 @@
 
   <script>
     let poses = '{{ poses }}'
-
-    console.log(poses);
+    let seq_num = "{{ seq_num }}"
+    console.log(poses[seq_num]);
     function updateValue() {
       fetch('/test_angle_score')
         .then(response => response.json())
@@ -105,17 +105,17 @@
 </head>
 
 <body>
-  <h1>자세 {{ poses[0].SEQ_NUM}} </h1>
+  <h1>자세 {{ poses[seq_num - 1].SEQ_NUM}} </h1>
   <div id="container">
     <div id="video">
-      <img src="{{ url_for('test_angle_video') }}" style="width: 1280px; height: 720px;">
+      <img src="{{ url_for('test_angle_video', folder_path = folder_path, seq_num = seq_num) }}" style="width: 1280px; height: 720px;">
     </div>
 
     <div id="position">
       <div>Current position:</div>
-      <img id="1" src="{{ poses[0].FILE_SOURCE }}">
+      <img id="1" src="{{ poses[seq_num - 1].FILE_SOURCE }}">
       <div>Next position:</div>
-      <img id="2" src="{{ poses[1].FILE_SOURCE }}">
+      <img id="2" src="{{ poses[seq_num].FILE_SOURCE }}">
     </div>
   </div>
 

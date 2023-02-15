@@ -460,18 +460,19 @@ def get_score():
 #                         }, ignore_index=True)
 #     return df
 
-def run():
+def run(folder_path, seq_num):
     CAMERA_DEVICE_ID = 0
     cap = cv2.VideoCapture(CAMERA_DEVICE_ID)
 
-    folder_path = '../../target_pose'
-    file_list = os.listdir(folder_path)
-    file_list_image = [file for file in file_list if file.endswith(('.jpg', 'jpeg', '.png'))]
-    file_list_image.sort()
-    print(f'Target Pose 이미지 목록 : {file_list_image}\n')
+    # file_list = os.listdir(folder_path)
+    # file_list_image = [file for file in file_list if file.endswith(('.jpg', 'jpeg', '.png'))]
+    # file_list_image.sort()
+    # print(f'Target Pose 이미지 목록 : {file_list_image}\n')
 
-    target_pose_image = "dab.jpg"
-
+    target_pose_image = f"pose_{seq_num}.jpg"
+    print("!!!!!!!!!!!!!!!!!!!")
+    print(folder_path)
+    print(target_pose_image)
     image_path = os.path.join(folder_path, target_pose_image)
 
     x = extractKeypoint(image_path)
