@@ -7,7 +7,7 @@ class Database():
     def __init__(self):
         self.db = pymysql.connect(host='localhost',
                                   user='root',
-                                  password='para2150!',
+                                  password='root',
                                   db='ROOMFIT_DB',
                                   charset='utf8')
         self.cursor = self.db.cursor(pymysql.cursors.DictCursor)

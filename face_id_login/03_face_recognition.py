@@ -47,7 +47,6 @@ while True:
 
     # 카메라 좌우 반전
     img = cv2.flip(img, 1)
-
     # 그레이 스케일로 변경
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
