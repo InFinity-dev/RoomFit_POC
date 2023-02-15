@@ -1,130 +1,544 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>Streaming</title>
 
-<head>
-  <title>Streaming </title>
+    <script>
+      let poses = "{{ poses }}";
 
-  <script>
-    let poses = '{{ poses }}'
+      console.log(poses);
+      function updateValue() {
+        fetch("/test_angle_score")
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("accuracy_score").textContent =
+              "자세 점수 : " + data.value;
+          });
 
-    console.log(poses);
-    function updateValue() {
-      fetch('/test_angle_score')
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('accuracy_score').textContent = "자세 점수 : " + data.value;
+        fetch("/get_remain_time")
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("remain").textContent = data.value;
+          });
+      }
+      // Refresh time in milliseconds
+      const term = 100;
+      setInterval(updateValue, term);
+    </script>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+
+      h1 {
+        margin: 0;
+        padding: 10px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+      }
+
+      #container {
+        display: flex;
+        flex-direction: row;
+        height: calc(100vh - 70px);
+        background-color: #f7f7f7;
+      }
+
+      #video {
+        display: flex;
+        flex-grow: 1;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #position {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 25%;
+        background-color: #ddd;
+        color: #333;
+        font-size: 24px;
+      }
+
+      #position img {
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+        margin: 10px 0;
+      }
+
+      #info {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #333;
+        color: #fff;
+        font-size: 18px;
+        padding: 10px;
+      }
+
+      #info a {
+        margin: 0 20px;
+        color: #fff;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      #value {
+        color: #f7b733;
+      }
+
+      #nowtime {
+        color: #39e600;
+      }
+
+      #exceedtime {
+        color: #ff0000;
+      }
+    </style>
+
+    <script>
+      import DeviceDetector from "https://cdn.skypack.dev/device-detector-js@2.2.10";
+      // Usage: testSupport({client?: string, os?: string}[])
+      // Client and os are regular expressions.
+      // See: https://cdn.jsdelivr.net/npm/device-detector-js@2.2.10/README.md for
+      // legal values for client and os
+      testSupport([{ client: "Chrome" }]);
+      function testSupport(supportedDevices) {
+        const deviceDetector = new DeviceDetector();
+        const detectedDevice = deviceDetector.parse(navigator.userAgent);
+        let isSupported = false;
+        for (const device of supportedDevices) {
+          if (device.client !== undefined) {
+            const re = new RegExp(`^${device.client}$`);
+            if (!re.test(detectedDevice.client.name)) {
+              continue;
+            }
+          }
+          if (device.os !== undefined) {
+            const re = new RegExp(`^${device.os}$`);
+            if (!re.test(detectedDevice.os.name)) {
+              continue;
+            }
+          }
+          isSupported = true;
+          break;
+        }
+        if (!isSupported) {
+          alert(
+            `This demo, running on ${detectedDevice.client.name}/${detectedDevice.os.name}, ` +
+              `is not well supported at this time, expect some flakiness while we improve our code.`
+          );
+        }
+      }
+      const controls = window;
+      const LandmarkGrid = window.LandmarkGrid;
+      const drawingUtils = window;
+      const mpPose = window;
+      const options = {
+        locateFile: (file) => {
+          return `https://cdn.jsdelivr.net/npm/@mediapipe/pose@${mpPose.VERSION}/${file}`;
+        },
+      };
+      // Our input frames will come from here.
+      const videoElement = document.getElementsByClassName("input_video")[0];
+      const canvasElement = document.getElementsByClassName("output_canvas")[0];
+      const controlsElement =
+        document.getElementsByClassName("control-panel")[0];
+      const canvasCtx = canvasElement.getContext("2d");
+      // We'll add this to our control panel later, but we'll save it here so we can
+      // call tick() each time the graph runs.
+      const fpsControl = new controls.FPS();
+      // Optimization: Turn off animated spinner after its hiding animation is done.
+      const spinner = document.querySelector(".loading");
+      spinner.ontransitionend = () => {
+        spinner.style.display = "none";
+      };
+      const landmarkContainer = document.getElementsByClassName(
+        "landmark-grid-container"
+      )[0];
+      const grid = new LandmarkGrid(landmarkContainer, {
+        connectionColor: 0xcccccc,
+        definedColors: [
+          { name: "LEFT", value: 0xffa500 },
+          { name: "RIGHT", value: 0x00ffff },
+        ],
+        range: 2,
+        fitToGrid: true,
+        labelSuffix: "m",
+        landmarkSize: 2,
+        numCellsPerAxis: 4,
+        showHidden: false,
+        centered: true,
+      });
+      let activeEffect = "mask";
+      function onResults(results) {
+        // Hide the spinner.
+        document.body.classList.add("loaded");
+        // Update the frame rate.
+        fpsControl.tick();
+        // Draw the overlays.
+        canvasCtx.save();
+        canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        if (results.segmentationMask) {
+          canvasCtx.drawImage(
+            results.segmentationMask,
+            0,
+            0,
+            canvasElement.width,
+            canvasElement.height
+          );
+          // Only overwrite existing pixels.
+          if (activeEffect === "mask" || activeEffect === "both") {
+            canvasCtx.globalCompositeOperation = "source-in";
+            // This can be a color or a texture or whatever...
+            canvasCtx.fillStyle = "#00FF007F";
+            canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+          } else {
+            canvasCtx.globalCompositeOperation = "source-out";
+            canvasCtx.fillStyle = "#0000FF7F";
+            canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+          }
+          // Only overwrite missing pixels.
+          canvasCtx.globalCompositeOperation = "destination-atop";
+          canvasCtx.drawImage(
+            results.image,
+            0,
+            0,
+            canvasElement.width,
+            canvasElement.height
+          );
+          canvasCtx.globalCompositeOperation = "source-over";
+        } else {
+          canvasCtx.drawImage(
+            results.image,
+            0,
+            0,
+            canvasElement.width,
+            canvasElement.height
+          );
+        }
+        if (results.poseLandmarks) {
+          drawingUtils.drawConnectors(
+            canvasCtx,
+            results.poseLandmarks,
+            mpPose.POSE_CONNECTIONS,
+            { visibilityMin: 0.65, color: "white" }
+          );
+          drawingUtils.drawLandmarks(
+            canvasCtx,
+            Object.values(mpPose.POSE_LANDMARKS_LEFT).map(
+              (index) => results.poseLandmarks[index]
+            ),
+            { visibilityMin: 0.65, color: "white", fillColor: "rgb(255,138,0)" }
+          );
+          drawingUtils.drawLandmarks(
+            canvasCtx,
+            Object.values(mpPose.POSE_LANDMARKS_RIGHT).map(
+              (index) => results.poseLandmarks[index]
+            ),
+            { visibilityMin: 0.65, color: "white", fillColor: "rgb(0,217,231)" }
+          );
+          drawingUtils.drawLandmarks(
+            canvasCtx,
+            Object.values(mpPose.POSE_LANDMARKS_NEUTRAL).map(
+              (index) => results.poseLandmarks[index]
+            ),
+            { visibilityMin: 0.65, color: "white", fillColor: "white" }
+          );
+        }
+        canvasCtx.restore();
+        if (results.poseWorldLandmarks) {
+          grid.updateLandmarks(
+            results.poseWorldLandmarks,
+            mpPose.POSE_CONNECTIONS,
+            [
+              {
+                list: Object.values(mpPose.POSE_LANDMARKS_LEFT),
+                color: "LEFT",
+              },
+              {
+                list: Object.values(mpPose.POSE_LANDMARKS_RIGHT),
+                color: "RIGHT",
+              },
+            ]
+          );
+        } else {
+          grid.updateLandmarks([]);
+        }
+      }
+
+      const pose = new mpPose.Pose(options);
+      pose.onResults(onResults);
+      // Present a control panel through which the user can manipulate the solution
+      // options.
+      new controls.ControlPanel(controlsElement, {
+        selfieMode: true,
+        modelComplexity: 1,
+        smoothLandmarks: true,
+        enableSegmentation: false,
+        smoothSegmentation: true,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5,
+        effect: "background",
+      })
+        .add([
+          new controls.StaticText({ title: "MediaPipe Pose" }),
+          fpsControl,
+          new controls.Toggle({ title: "Selfie Mode", field: "selfieMode" }),
+          new controls.SourcePicker({
+            onSourceChanged: () => {
+              // Resets because this model gives better results when reset between
+              // source changes.
+              pose.reset();
+            },
+            onFrame: async (input, size) => {
+              const aspect = size.height / size.width;
+              let width, height;
+              if (window.innerWidth > window.innerHeight) {
+                height = window.innerHeight;
+                width = height / aspect;
+              } else {
+                width = window.innerWidth;
+                height = width * aspect;
+              }
+              canvasElement.width = width;
+              canvasElement.height = height;
+              await pose.send({ image: input });
+            },
+          }),
+          new controls.Slider({
+            title: "Model Complexity",
+            field: "modelComplexity",
+            discrete: ["Lite", "Full", "Heavy"],
+          }),
+          new controls.Toggle({
+            title: "Smooth Landmarks",
+            field: "smoothLandmarks",
+          }),
+          new controls.Toggle({
+            title: "Enable Segmentation",
+            field: "enableSegmentation",
+          }),
+          new controls.Toggle({
+            title: "Smooth Segmentation",
+            field: "smoothSegmentation",
+          }),
+          new controls.Slider({
+            title: "Min Detection Confidence",
+            field: "minDetectionConfidence",
+            range: [0, 1],
+            step: 0.01,
+          }),
+          new controls.Slider({
+            title: "Min Tracking Confidence",
+            field: "minTrackingConfidence",
+            range: [0, 1],
+            step: 0.01,
+          }),
+          new controls.Slider({
+            title: "Effect",
+            field: "effect",
+            discrete: { background: "Background", mask: "Foreground" },
+          }),
+        ])
+        .on((x) => {
+          const options = x;
+          videoElement.classList.toggle("selfie", options.selfieMode);
+          activeEffect = x["effect"];
+          pose.setOptions(options);
         });
+    </script>
 
-      fetch('/get_remain_time')
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('remain').textContent = data.value;
-        });
-    }
-    // Refresh time in milliseconds
-    const term = 100;
-    setInterval(updateValue, term); 
-  </script>
+    <style>
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .abs {
+        position: absolute;
+      }
 
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
+      a {
+        color: white;
+        text-decoration: none;
+      }
+      a:hover {
+        color: lightblue;
+      }
 
-    h1 {
-      margin: 0;
-      padding: 10px;
-      background-color: #333;
-      color: #fff;
-      text-align: center;
-    }
+      body {
+        bottom: 0;
+        font-family: "Titillium Web", sans-serif;
+        color: white;
+        left: 0;
+        margin: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transform-origin: 0px 0px;
+        overflow: hidden;
+      }
 
-    #container {
-      display: flex;
-      flex-direction: row;
-      height: calc(100vh - 70px);
-      background-color: #f7f7f7;
-    }
+      .container {
+        position: absolute;
+        background-color: #596e73;
+        width: 100%;
+        max-height: 100%;
+      }
 
-    #video {
-      display: flex;
-      flex-grow: 1;
-      justify-content: center;
-      align-items: center;
-    }
+      .input_video {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+      .input_video.selfie {
+        transform: scale(-1, 1);
+      }
 
-    #position {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      width: 25%;
-      background-color: #ddd;
-      color: #333;
-      font-size: 24px;
-    }
+      .input_image {
+        position: absolute;
+      }
 
-    #position img {
-      width: 100%;
-      max-width: 300px;
-      height: auto;
-      margin: 10px 0;
-    }
+      .canvas-container {
+        display: flex;
+        height: 100%;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+      }
 
-    #info {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: #333;
-      color: #fff;
-      font-size: 18px;
-      padding: 10px;
-    }
+      .output_canvas {
+        width: 100%;
+        display: block;
+        position: relative;
+        left: 0;
+        top: 0;
+      }
 
-    #info a {
-      margin: 0 20px;
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-    }
+      .logo {
+        bottom: 10px;
+        right: 20px;
+      }
+      .logo .title {
+        color: white;
+        font-size: 28px;
+      }
+      .logo .subtitle {
+        position: relative;
+        color: white;
+        font-size: 10px;
+        left: -30px;
+        top: 20px;
+      }
 
-    #value {
-      color: #f7b733;
-    }
+      .control-panel {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+      }
 
-    #nowtime {
-      color: #39e600;
-    }
+      .loading {
+        display: flex;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        align-items: center;
+        backface-visibility: hidden;
+        justify-content: center;
+        opacity: 1;
+        transition: opacity 1s;
+      }
+      .loading .message {
+        font-size: x-large;
+      }
+      .loading .spinner {
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        animation: spin 1s linear infinite;
+        border: 32px solid #bebebe;
+        border-top: 32px solid #3498db;
+        border-radius: 50%;
+      }
 
-    #exceedtime {
-      color: #ff0000;
-    }
-  </style>
-</head>
+      .loaded .loading {
+        opacity: 0;
+      }
 
-<body>
-  <h1>자세 {{ poses[0].SEQ_NUM}} </h1>
-  <div id="container">
-    <div id="video">
-      <img src="{{ url_for('test_angle_video') }}" style="width: 1280px; height: 720px;">
+      .shoutout {
+        left: 0;
+        right: 0;
+        bottom: 40px;
+        text-align: center;
+        font-size: 24px;
+        position: absolute;
+      }
+      .square-box {
+        width: 33%;
+        height: 0;
+        padding-top: 33%;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+      }
+
+      .landmark-grid-container {
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: #99999999;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>자세 {{ poses[0].SEQ_NUM}}</h1>
+    <div id="container">
+      <div id="video">
+        <img
+          src="{{ url_for('test_angle_video') }}"
+          style="width: 1280px; height: 720px"
+        />
+      </div>
+
+      <div id="position">
+        <div>Current position:</div>
+        <img id="1" src="{{ poses[0].FILE_SOURCE }}" />
+        <div>Next position:</div>
+        <img id="2" src="{{ poses[1].FILE_SOURCE }}" />
+        <div class="square-box">
+          <div class="landmark-grid-container"></div>
+        </div>
+      </div>
     </div>
 
-    <div id="position">
-      <div>Current position:</div>
-      <img id="1" src="{{ poses[0].FILE_SOURCE }}">
-      <div>Next position:</div>
-      <img id="2" src="{{ poses[1].FILE_SOURCE }}">
+    <div id="call-trainer">
+      <input type="submit" class="coachsubmit" value="코치 연결하기"></br>
     </div>
-  </div>
 
-  <div id="info">
-    <a>Score = <span id="accuracy_score">0</span></a>
-    <a>Time = <span id="nowtime">0</span></a>
-    <a>/</a>
-    <a><span id="remaintime">0</span></a>
-  </div>
-</body>
-
+    <div id="info">
+      <a>Score = <span id="accuracy_score">0</span></a>
+      <a>Time = <span id="nowtime">0</span></a>
+      <a>/</a>
+      <a><span id="remaintime">0</span></a>
+    </div>
+  </body>
 </html>

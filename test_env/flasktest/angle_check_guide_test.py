@@ -435,7 +435,6 @@ def diff_compare(x, y):
     # print(calc_average(average))
     return score
 
-
 def diff_compare_angle(x, y):
     new_x = []
     for i, j in zip(range(len(x)), range(len(y))):
@@ -474,6 +473,7 @@ def run():
 
     image_path = os.path.join(folder_path, target_pose_image)
 
+    #정답이미지의 랜드마크, 관절 각도 추출
     x = extractKeypoint(image_path)
     # cv2.imshow('target', x[3])
     angle_target = x[2]
