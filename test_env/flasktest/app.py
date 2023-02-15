@@ -195,7 +195,7 @@ def angle_check_gen(poses):
         # cv2.imshow('target', x[3])
         angle_target = x[2]
         point_target = x[1]
-        
+
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -379,7 +379,7 @@ def angle_check_gen(poses):
 
             if cv2.waitKey(1) & 0xFF == 27:
                 break
-        
+
         time.sleep(2)
 
 @app.route('/test_angle_score')
@@ -558,7 +558,8 @@ def face_data(user_name):
         os.mkdir(save_path)
 
     count=0
-    face_detector = cv2.CascadeClassifier('./static/face_training/haarcascade_frontalface_default.xml')
+    # face_detector = cv2.CascadeClassifier('./static/face_training/haarcascade_frontalface_default.xml')
+    face_detector = cv2.CascadeClassifier('./haarcascade_frontalface_default.xml')
     # Read until video is completed
     while(cap.isOpened()):
         ret, img = cap.read()  # import image
