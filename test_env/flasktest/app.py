@@ -168,10 +168,15 @@ def angle_check_gen(poses):
     global detect_seq_num
     global cur_img_path
     global next_img_path
-    for i in range(0, len(poses) - 1):
+    for i in range(0, len(poses)):
         detect_seq_num = i
-        cur_img_path = poses[i]['FILE_SOURCE']
-        next_img_path = poses[i + 1]['FILE_SOURCE']
+
+        if i != len(poses) - 1:
+            cur_img_path = poses[i]['FILE_SOURCE']
+            next_img_path = poses[i + 1]['FILE_SOURCE']
+        else:
+            cur_img_path = poses[i]['FILE_SOURCE']
+            next_img_path = './static/pose_end.png'
 
         print(poses[i])
         count_time = int(poses[i]['POSE_DUR']) * webcam_fps
@@ -349,7 +354,7 @@ def angle_check_gen(poses):
                     score = int((1 - p_score) * 100)
 
                 # cv2.putText(img, str("DURATION:"), (700, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0, 255, 255], 2,cv2.LINE_AA)
-                if score >= 30:
+                if score >= 50:
                     count_time -= 1
                     cv2.putText(img, str("DURATION: ") + str(count_time // webcam_fps), (700, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0, 255, 255], 2,cv2.LINE_AA)
                 else:
@@ -366,7 +371,7 @@ def angle_check_gen(poses):
             img = cv2.imencode('.jpg', img)[1].tobytes()
             yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + img + b'\r\n')
 
-            if score >= 30:
+            if score >= 50:
                 count_time -= 1
 
             if count_time <= 0:
@@ -424,14 +429,14 @@ def upload_video():
         sql      = "INSERT INTO ROOMFIT_DB.ROUTINE_MODEL(MODEL_NAME, TOTAL_POSE_CNT, TOTAL_TIME, THUMBNAIL) \
                     VALUES('%s', '%d', '%d', '%s')" % (model_name, total_pose_cnt, total_time, thumbnail)
         inserted_id = db_class.execute(sql)
-
+        print(inserted_id)
         seq_num = 0
         for pose in vid_slice_info:
             seq_num += 1
             pose_dur = pose[2]
             file_path = "./static/target_pose/" + file_name + "/pose_" + str(seq_num) + ".jpg"
             sql = "INSERT INTO ROOMFIT_DB.ROUTINE_MODEL_POSE(MODEL_ID, SEQ_NUM, POSE_DUR, FILE_SOURCE) \
-                    VALUES('%d', '%d', '%d', '%s')" % (inserted_id, seq_num, pose_dur, file_path)
+                    VALUES('%d', '%d', '%d', '%s')" % (int(inserted_id), int(seq_num), int(pose_dur), file_path)
             db_class.execute(sql)
 
         db_class.commit()
