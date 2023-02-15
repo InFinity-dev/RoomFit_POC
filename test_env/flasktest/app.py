@@ -459,6 +459,10 @@ def generate():
         time.sleep(1)
         yield f'<p>{i}</p>\n'
 
+# TODO : 위 변수를 받아서 페이지 리로딩 없이 HTML에 렌더링 하는게 목표
+# 1. 변수로 받는 방법 - HTML 요소로 바로 되는지? 비디오 스트림 img src로 받아온것 처럼
+#                 - 자바스크립트 변수로 받아야 되는지?
+# 2. 대안 : iframe 으로 리로딩 되어야 할 부분만 만들어서 거기다가 넣고 리로딩
 @app.route('/stream')
 def stream():
     return Response(generate(), mimetype='text/html')
