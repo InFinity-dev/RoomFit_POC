@@ -449,3 +449,16 @@ def face_model_gen():
     time.sleep(1)
     FaceLtimeout=True
 # 얼굴 인식 로그인 end
+
+# 데이터 스트림 테스트
+
+# generator 함수
+def generate():
+    for i in range(100):
+        # 1초 딜레이
+        time.sleep(1)
+        yield f'<p>{i}</p>\n'
+
+@app.route('/stream')
+def stream():
+    return Response(generate(), mimetype='text/html')
