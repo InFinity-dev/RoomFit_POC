@@ -596,7 +596,7 @@ def face_training():
     model_exist_check = os.path.join(trainset_path, 'user_face_model.yml')
 
     recognizer = cv2.face.LBPHFaceRecognizer_create()
-    detector = cv2.CascadeClassifier("./static/face_training/haarcascade_frontalface_default.xml")
+    detector = cv2.CascadeClassifier("./haarcascade_frontalface_default.xml")
 
     target_images = []
     facesamples = []
@@ -656,7 +656,7 @@ def face_model_gen():
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     recognizer.read('./static/face_training/train_data/user_face_model.yml')
 
-    cascadePath = "./static/face_training/haarcascade_frontalface_default.xml"
+    cascadePath = "./haarcascade_frontalface_default.xml"
     faceCascade = cv2.CascadeClassifier(cascadePath)
 
     user_list = pd.read_csv('./static/face_training/model_user_list.csv')
