@@ -154,7 +154,7 @@ cur_img_path = ""
 next_img_path = ""
 
 @app.route('/detect_seq_num')
-def detect_seq_num():
+def detect_seq_function():
     return jsonify({'value': detect_seq_num, 'cur_img_path': cur_img_path, 'next_img_path': next_img_path})
 
 def angle_check_gen(poses):
